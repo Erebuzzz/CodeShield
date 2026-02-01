@@ -89,11 +89,23 @@ export const ReactiveCodeGraph: React.FC<ReactiveCodeGraphProps> = ({
     const [connections, setConnections] = useState<Connection[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    // Initial setup and mode reaction
     useEffect(() => {
-        const initialNodes = generateNodes(20);
+        const count = mode === 'reactive' ? 30 : 20;
+        const initialNodes = generateNodes(count);
         setNodes(initialNodes);
         setConnections(generateConnections(initialNodes));
-    }, []);
+    }, [mode]);
+
+    // React to code typing
+    useEffect(() => {
+        if (code) {
+            setNodes(prev => prev.map(n => ({
+                ...n,
+                active: Math.random() > 0.8
+            })));
+        }
+    }, [code]);
 
     // Fast animation when processing
     useEffect(() => {
