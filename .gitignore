@@ -1,34 +1,54 @@
-# Byte-compiled
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Environment
+# Virtual Environments
 .env
-.venv/
-venv/
+.venv
 env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 
-# Build
-dist/
-build/
-*.egg-info/
+# LeanMCP
+.leanmcp/
 
-# Test
-.pytest_cache/
-.coverage
-htmlcov/
+# Daytona
+.daytona/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Project specific
+# CodeShield
 *.db
-context_vault.sqlite

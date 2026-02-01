@@ -78,6 +78,7 @@ class VerificationResult:
             "is_valid": self.is_valid,
             "issues": [
                 {
+                    "type": i.severity,
                     "severity": i.severity,
                     "message": i.message,
                     "line": i.line,
