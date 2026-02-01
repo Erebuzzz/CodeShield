@@ -29,13 +29,8 @@ class LLMClient:
         "cometapi": {
             "base_url": "https://api.cometapi.com/v1",
             "env_key": "COMETAPI_KEY",
-            "default_model": "deepseek/deepseek-v3",  # Free model
-            "free_models": ["deepseek/deepseek-r1", "meta-llama/llama-4", "grok-3"],
-        },
-        "novita": {
-            "base_url": "https://api.novita.ai/v3/openai",
-            "env_key": "NOVITA_API_KEY",
-            "default_model": "deepseek/deepseek-v3.2",
+            "default_model": "deepseek-chat",  # Free model
+            "free_models": ["deepseek-chat", "deepseek-reasoner", "llama-4-maverick"],
         },
         "aiml": {
             "base_url": "https://api.aimlapi.com/v1",
@@ -93,6 +88,7 @@ class LLMClient:
         messages.append({"role": "user", "content": prompt})
         
         try:
+            # Use httpx directly (most reliable)
             response = self._client.post(
                 f"{config['base_url']}/chat/completions",
                 headers={
@@ -116,6 +112,50 @@ class LLMClient:
             )
         except Exception as e:
             print(f"LLM error ({provider_name}): {e}")
+            # Try next provider
+            if provider_name == "cometapi":
+                return self._try_aiml(prompt, system_prompt, model, max_tokens)
+            return None
+    
+    def _try_aiml(self, prompt: str, system_prompt: Optional[str], model: Optional[str], max_tokens: int) -> Optional[LLMResponse]:
+        """Fallback to AIML API"""
+        config = self.PROVIDERS.get("aiml")
+        if not config:
+            return None
+        
+        api_key = os.getenv(config["env_key"])
+        if not api_key:
+            return None
+        
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+        
+        try:
+            response = self._client.post(
+                f"{config['base_url']}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": model or config["default_model"],
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            return LLMResponse(
+                content=data["choices"][0]["message"]["content"],
+                provider="aiml",
+                model=model or config["default_model"],
+                tokens_used=data.get("usage", {}).get("total_tokens", 0),
+            )
+        except Exception as e:
+            print(f"AIML error: {e}")
             return None
     
     def generate_fix(self, code: str, issues: list[str]) -> Optional[str]:

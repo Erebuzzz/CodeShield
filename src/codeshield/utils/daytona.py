@@ -36,18 +36,25 @@ class ExecutionResult:
 class DaytonaClient:
     """Client for Daytona sandbox execution"""
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None):
         self.api_key = api_key or os.getenv("DAYTONA_API_KEY")
+        self.api_url = api_url or os.getenv("DAYTONA_API_URL", "https://app.daytona.io/api")
         self._client = None
         self._sandbox = None
     
     def _ensure_sdk(self):
         """Ensure Daytona SDK is available"""
         try:
-            from daytona_sdk import Daytona, SandboxConfig
-            return Daytona, SandboxConfig
+            # Official SDK import (pip install daytona)
+            from daytona import Daytona, DaytonaConfig
+            return Daytona, DaytonaConfig
         except ImportError:
-            return None, None
+            try:
+                # Alternative import (pip install daytona-sdk)
+                from daytona_sdk import Daytona, DaytonaConfig
+                return Daytona, DaytonaConfig
+            except ImportError:
+                return None, None
     
     def is_available(self) -> bool:
         """Check if Daytona is available and configured"""
@@ -87,40 +94,38 @@ class DaytonaClient:
             )
         
         try:
-            # Initialize Daytona client
-            daytona = Daytona(api_key=self.api_key)
+            # Get SDK classes
+            Daytona, DaytonaConfig = self._ensure_sdk()
             
-            # Create sandbox with appropriate config
-            config = SandboxConfig(
-                language=language,
-                timeout=timeout_seconds,
-            )
+            if Daytona is None:
+                return self._local_execute(code, language, timeout_seconds)
             
-            sandbox = daytona.create(config)
+            # Initialize Daytona client with config (official SDK pattern)
+            config = DaytonaConfig(api_key=self.api_key)
+            daytona = Daytona(config)
+            
+            # Create sandbox
+            sandbox = daytona.create()
             
             try:
                 # Execute code in sandbox
-                result = sandbox.process.code_run(code)
+                response = sandbox.process.code_run(code)
                 
                 return ExecutionResult(
-                    success=result.exit_code == 0,
-                    stdout=result.logs or "",
+                    success=response.exit_code == 0,
+                    stdout=response.result or "",
                     stderr="",
-                    exit_code=result.exit_code,
+                    exit_code=response.exit_code,
                     execution_time_ms=0,
                 )
             finally:
                 # Clean up sandbox
-                daytona.remove(sandbox)
+                daytona.delete(sandbox)
                 
         except Exception as e:
-            return ExecutionResult(
-                success=False,
-                stdout="",
-                stderr=str(e),
-                exit_code=-1,
-                error=f"Daytona execution failed: {e}",
-            )
+            # Fall back to local execution if Daytona fails
+            print(f"Daytona error: {e}, falling back to local execution")
+            return self._local_execute(code, language, timeout_seconds)
     
     def _local_execute(
         self,
