@@ -1,0 +1,15 @@
+{
+    "mcpServers": {
+        "codeshield": {
+            "command": "python",
+            "args": [
+                "-m",
+                "codeshield.mcp.server"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        }
+    }
+}
