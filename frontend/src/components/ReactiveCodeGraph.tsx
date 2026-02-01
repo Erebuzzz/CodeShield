@@ -10,10 +10,13 @@ interface Node {
     id: string;
     x: number;
     y: number;
+    offsetX: number;
+    offsetY: number;
     type: 'function' | 'class' | 'import' | 'variable' | 'mcp';
     label: string;
     active: boolean;
     size: number;
+    duration: number;
 }
 
 interface Connection {
@@ -22,13 +25,13 @@ interface Connection {
     active: boolean;
 }
 
-// Deep Techno/Scientific colors for the animated background
+// Deep Techno/Scientific colors - Increased brightness for contrast
 const NODE_COLORS = {
-    function: '#6366f1',  // Indigo
-    class: '#a855f7',     // Purple
-    import: '#3b82f6',    // Blue
-    variable: '#818cf8',  // Indigo Light
-    mcp: '#ffffff'        // White
+    function: '#818cf8',  // Bright Indigo
+    class: '#c084fc',     // Bright Purple
+    import: '#60a5fa',    // Bright Blue
+    variable: '#a5b4fc',  // Very Light Indigo
+    mcp: '#ffffff'        // Pure White
 };
 
 const generateNodes = (count: number): Node[] => {
@@ -47,10 +50,13 @@ const generateNodes = (count: number): Node[] => {
             id: `node-${i}`,
             x: 10 + Math.random() * 80,
             y: 10 + Math.random() * 80,
+            offsetX: Math.random() * 5 - 2.5,
+            offsetY: Math.random() * 5 - 2.5,
             type,
             label: labels[type][Math.floor(Math.random() * labels[type].length)],
             active: false,
             size: type === 'class' ? 6 : type === 'mcp' ? 8 : 4,
+            duration: 3 + Math.random() * 2,
         };
     });
 };
@@ -93,17 +99,26 @@ export const ReactiveCodeGraph: React.FC<ReactiveCodeGraphProps> = ({
     useEffect(() => {
         const count = mode === 'reactive' ? 30 : 20;
         const initialNodes = generateNodes(count);
-        setNodes(initialNodes);
-        setConnections(generateConnections(initialNodes));
+        
+        // Use timeout to avoid synchronous state update warning during render
+        const timer = setTimeout(() => {
+            setNodes(initialNodes);
+            setConnections(generateConnections(initialNodes));
+        }, 0);
+        
+        return () => clearTimeout(timer);
     }, [mode]);
 
     // React to code typing
     useEffect(() => {
         if (code) {
-            setNodes(prev => prev.map(n => ({
-                ...n,
-                active: Math.random() > 0.8
-            })));
+           const timer = setTimeout(() => {
+                setNodes(prev => prev.map(n => ({
+                    ...n,
+                    active: Math.random() > 0.8
+                })));
+           }, 0);
+           return () => clearTimeout(timer);
         }
     }, [code]);
 
@@ -112,152 +127,86 @@ export const ReactiveCodeGraph: React.FC<ReactiveCodeGraphProps> = ({
         if (!isProcessing) return;
 
         const interval = setInterval(() => {
-            // Activate multiple nodes at once during processing
-            setNodes(prev => {
-                const updated = [...prev];
-                const count = Math.floor(Math.random() * 3) + 2;
-                for (let j = 0; j < count; j++) {
-                    const randomIndex = Math.floor(Math.random() * updated.length);
-                    updated[randomIndex] = { ...updated[randomIndex], active: true };
-                }
-                return updated;
-            });
-
-            setTimeout(() => {
-                setNodes(p => p.map(n => ({ ...n, active: false })));
-            }, 400);
-
-            setConnections(prev => {
-                if (prev.length === 0) return prev;
-                const updated = [...prev];
-                const count = Math.min(3, updated.length);
-                for (let j = 0; j < count; j++) {
-                    const randomIndex = Math.floor(Math.random() * updated.length);
-                    updated[randomIndex] = { ...updated[randomIndex], active: true };
-                }
-                return updated;
-            });
-
-            setTimeout(() => {
-                setConnections(p => p.map(c => ({ ...c, active: false })));
-            }, 300);
-        }, 200);
+            setNodes(prev => prev.map(n => ({
+                ...n,
+                x: n.x + (Math.random() - 0.5) * 2,
+                y: n.y + (Math.random() - 0.5) * 2,
+                active: Math.random() > 0.7,
+            })));
+        }, 100);
 
         return () => clearInterval(interval);
     }, [isProcessing]);
 
-    // Ambient animation - MCP pulse effect
-    useEffect(() => {
-        if (isProcessing) return;
-
-        const interval = setInterval(() => {
-            setNodes(prev => {
-                const updated = [...prev];
-                // Prioritize MCP nodes when connected
-                const mcpNodes = updated.filter(n => n.type === 'mcp');
-                const targetNodes = mcpConnected && mcpNodes.length > 0 ? mcpNodes : updated;
-                const randomIndex = Math.floor(Math.random() * targetNodes.length);
-                const nodeIndex = updated.findIndex(n => n.id === targetNodes[randomIndex].id);
-                if (nodeIndex >= 0) {
-                    updated[nodeIndex] = { ...updated[nodeIndex], active: true };
-                }
-                return updated;
-            });
-
-            setTimeout(() => {
-                setNodes(p => p.map(n => ({ ...n, active: false })));
-            }, 1200);
-        }, 2500);
-
-        return () => clearInterval(interval);
-    }, [isProcessing, mcpConnected]);
-
-    const getNodePosition = (nodeId: string) => {
-        const node = nodes.find(n => n.id === nodeId);
-        return node ? { x: node.x, y: node.y } : { x: 0, y: 0 };
-    };
-
     return (
-        <div
-            ref={containerRef}
-            className="fixed inset-0 overflow-hidden pointer-events-none z-0"
-        >
-            {/* Gradient Orbs */}
-            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px]" />
-            {mcpConnected && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-pink-500/5 rounded-full blur-[80px] animate-pulse" />
-            )}
+        <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            {/* Ambient Background Gradient - Slight boost in opacity for contrast */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#030305] to-[#1e1b4b] opacity-80" />
+            
+            {/* Grid Pattern */}
+            <div 
+                className="absolute inset-0 opacity-[0.03]" 
+                style={{
+                    backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
+                    backgroundSize: '50px 50px'
+                }}
+            />
 
-            {/* Connection Lines */}
-            <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.6 }}>
-                <defs>
-                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.4" />
-                    </linearGradient>
-                    <linearGradient id="mcpGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#ec4899" stopOpacity="0.6" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.6" />
-                    </linearGradient>
-                </defs>
-                {connections.map((conn, i) => {
-                    const from = getNodePosition(conn.from);
-                    const to = getNodePosition(conn.to);
-                    const fromNode = nodes.find(n => n.id === conn.from);
-                    const isMcpConnection = fromNode?.type === 'mcp';
-                    return (
-                        <motion.line
-                            key={i}
-                            x1={`${from.x}%`}
-                            y1={`${from.y}%`}
-                            x2={`${to.x}%`}
-                            y2={`${to.y}%`}
-                            stroke={conn.active ? (isMcpConnection ? '#ec4899' : '#10b981') : (isMcpConnection ? 'url(#mcpGradient)' : 'url(#lineGradient)')}
-                            strokeWidth={conn.active ? 2 : 1}
-                            strokeOpacity={conn.active ? 0.9 : 0.15}
-                            strokeLinecap="round"
-                            animate={{
-                                strokeOpacity: conn.active ? [0.15, 0.9, 0.15] : 0.15,
-                            }}
-                            transition={{ duration: 0.4 }}
-                        />
-                    );
-                })}
-            </svg>
-
-            {/* AST Nodes */}
             <AnimatePresence>
+                {/* Connections */}
+                <svg className="absolute inset-0 w-full h-full">
+                    {connections.map((conn, i) => {
+                        const fromNode = nodes.find(n => n.id === conn.from);
+                        const toNode = nodes.find(n => n.id === conn.to);
+                        if (!fromNode || !toNode) return null;
+
+                        return (
+                            <motion.line
+                                key={`conn-${i}`}
+                                x1={`${fromNode.x}%`}
+                                y1={`${fromNode.y}%`}
+                                x2={`${toNode.x}%`}
+                                y2={`${toNode.y}%`}
+                                stroke={NODE_COLORS[fromNode.type]}
+                                strokeWidth="1"
+                                initial={{ opacity: 0, pathLength: 0 }}
+                                animate={{ 
+                                    opacity: isProcessing ? 0.6 : 0.2, // Increased opacity
+                                    pathLength: 1 
+                                }}
+                                transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+                            />
+                        );
+                    })}
+                </svg>
+
+                {/* Nodes */}
                 {nodes.map((node) => (
                     <motion.div
                         key={node.id}
-                        className="absolute"
+                        className="absolute rounded-full"
                         style={{
                             left: `${node.x}%`,
                             top: `${node.y}%`,
-                            transform: 'translate(-50%, -50%)',
+                            width: node.size,
+                            height: node.size,
+                            backgroundColor: NODE_COLORS[node.type],
+                            boxShadow: `0 0 15px ${NODE_COLORS[node.type]}`, // Enhanced glow
                         }}
                         initial={{ opacity: 0, scale: 0 }}
-                        animate={{
-                            opacity: node.active ? 1 : 0.4,
-                            scale: node.active ? 1.5 : 1,
+                        animate={{ 
+                            opacity: [0.4, 1, 0.4], // Higher minimum opacity
+                            scale: [1, 1.5, 1],
+                            x: `${node.x + node.offsetX}%`,
+                            y: `${node.y + node.offsetY}%`
                         }}
-                        transition={{ duration: 0.2 }}
+                        transition={{
+                            duration: node.duration,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
                     >
-                        {/* Node Circle */}
-                        <div
-                            className="relative flex items-center justify-center rounded-full"
-                            style={{
-                                width: node.size,
-                                height: node.size,
-                                backgroundColor: NODE_COLORS[node.type],
-                                boxShadow: node.active
-                                    ? `0 0 20px ${NODE_COLORS[node.type]}, 0 0 40px ${NODE_COLORS[node.type]}60`
-                                    : `0 0 8px ${NODE_COLORS[node.type]}40`,
-                            }}
-                        />
-
-                        {/* Pulse ring when active */}
+                        {/* Pulse Effect for Active Nodes */}
                         {node.active && (
                             <>
                                 <motion.div
@@ -286,10 +235,10 @@ export const ReactiveCodeGraph: React.FC<ReactiveCodeGraphProps> = ({
                         {/* Label */}
                         {node.active && (
                             <motion.span
-                                className="absolute left-full ml-2 text-[9px] font-mono whitespace-nowrap"
+                                className="absolute left-full ml-2 text-[10px] font-bold font-mono whitespace-nowrap drop-shadow-md"
                                 style={{ color: NODE_COLORS[node.type] }}
                                 initial={{ opacity: 0, x: -5 }}
-                                animate={{ opacity: 0.8, x: 0 }}
+                                animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0 }}
                             >
                                 {node.label}
@@ -302,8 +251,8 @@ export const ReactiveCodeGraph: React.FC<ReactiveCodeGraphProps> = ({
             {/* MCP Status Indicator */}
             {mcpConnected && (
                 <div className="absolute bottom-8 left-8 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] text-slate-500 font-mono">MCP Connected</span>
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                    <span className="text-[10px] text-slate-400 font-mono font-medium tracking-wide">MCP LINKED</span>
                 </div>
             )}
         </div>
