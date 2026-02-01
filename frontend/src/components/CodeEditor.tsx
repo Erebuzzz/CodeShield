@@ -42,16 +42,6 @@ interface CodeEditorProps {
     isProcessing: boolean;
 }
 
-// Simple syntax highlighter
-const highlightSyntax = (code: string): string => {
-    // This is a basic highlighter, you could use a library like Prism.js for better results
-    return code
-        .replace(/(def |class |import |from |return |if |else |elif |for |while |try |except |finally |with |as |in |not |and |or |True|False|None)/g, '<span class="text-purple-400">$1</span>')
-        .replace(/(["'])(.*?)\1/g, '<span class="text-green-400">$1$2$1</span>')
-        .replace(/(#.*$)/gm, '<span class="text-slate-500">$1</span>')
-        .replace(/\b(\d+)\b/g, '<span class="text-orange-400">$1</span>');
-};
-
 export const CodeEditor: React.FC<CodeEditorProps> = ({
     code,
     onCodeChange,
@@ -75,73 +65,76 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full max-w-4xl mx-auto"
+            className="w-full max-w-5xl mx-auto"
         >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-[#1a1a24] border border-b-0 border-slate-800 rounded-t-lg">
-                <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                        <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                    </div>
-                    <span className="ml-3 text-sm text-slate-500 font-mono">paste_code.py</span>
-                </div>
-
-                <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-400 hover:text-white transition-colors"
-                >
-                    <CopyIcon />
-                    {copied ? 'Copied!' : 'Copy'}
-                </button>
-            </div>
-
-            {/* Editor */}
-            <div className="relative bg-[#12121a] border border-slate-800 rounded-b-lg overflow-hidden">
-                <div className="flex">
-                    {/* Line Numbers */}
-                    <div className="flex-shrink-0 py-4 px-3 bg-[#0d0d14] border-r border-slate-800/50 select-none">
-                        {Array.from({ length: Math.max(lineCount, 10) }, (_, i) => (
-                            <div key={i} className="text-xs text-slate-600 font-mono text-right leading-6">
-                                {i + 1}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Code Area */}
-                    <textarea
-                        value={code}
-                        onChange={(e) => onCodeChange(e.target.value)}
-                        placeholder="# Paste your AI-generated Python code here...&#10;&#10;def example():&#10;    pass"
-                        className="flex-1 min-h-[300px] p-4 bg-transparent text-slate-200 font-mono text-sm leading-6 resize-none focus:outline-none"
-                        style={{ caretColor: '#22c55e' }}
-                        spellCheck={false}
-                    />
-                </div>
-
-                {/* Processing Overlay */}
-                {isProcessing && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
-                    >
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="w-12 h-12 border-4 border-slate-700 border-t-green-500 rounded-full animate-spin" />
-                            <span className="text-sm text-slate-400 font-mono">Analyzing code...</span>
+            {/* Editor Container */}
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a10]/80 backdrop-blur-sm">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
+                    <div className="flex items-center gap-3">
+                        <div className="flex gap-1.5">
+                            <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                            <div className="w-3 h-3 rounded-full bg-green-500/80" />
                         </div>
-                    </motion.div>
-                )}
+                        <span className="text-xs text-slate-500 font-mono">input.py</span>
+                    </div>
+
+                    <button
+                        onClick={handleCopy}
+                        className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 hover:text-emerald-400 transition-colors duration-300 rounded-lg hover:bg-white/5"
+                    >
+                        <CopyIcon />
+                        {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                </div>
+
+                {/* Editor */}
+                <div className="relative">
+                    <div className="flex">
+                        {/* Line Numbers */}
+                        <div className="flex-shrink-0 py-4 px-4 bg-white/[0.02] border-r border-white/5 select-none">
+                            {Array.from({ length: Math.max(lineCount, 12) }, (_, i) => (
+                                <div key={i} className="text-xs text-slate-700 font-mono text-right leading-6">
+                                    {i + 1}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Code Area */}
+                        <textarea
+                            value={code}
+                            onChange={(e) => onCodeChange(e.target.value)}
+                            placeholder="# Paste your Python code here..."
+                            className="flex-1 min-h-[320px] p-4 bg-transparent text-slate-300 font-mono text-sm leading-6 resize-none focus:outline-none placeholder:text-slate-600"
+                            style={{ caretColor: '#10b981' }}
+                            spellCheck={false}
+                        />
+                    </div>
+
+                    {/* Processing Overlay */}
+                    {isProcessing && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-b-2xl"
+                        >
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="w-10 h-10 border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
+                                <span className="text-sm text-slate-400">Analyzing code...</span>
+                            </div>
+                        </motion.div>
+                    )}
+                </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 mt-4 justify-center">
+            <div className="flex flex-wrap gap-3 mt-6 justify-center">
                 <motion.button
                     onClick={onVerify}
                     disabled={isProcessing || !code.trim()}
-                    className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors"
-                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:shadow-lg hover:shadow-emerald-500/25 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-white text-sm font-medium transition-all duration-300 rounded-xl"
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                 >
                     <VerifyIcon />
@@ -151,7 +144,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 <motion.button
                     onClick={onCheckStyle}
                     disabled={isProcessing || !code.trim()}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-8 py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/50 disabled:bg-transparent disabled:border-white/5 disabled:text-slate-600 text-white text-sm font-medium transition-all duration-300 rounded-xl backdrop-blur-sm"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                 >
@@ -162,7 +155,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 <motion.button
                     onClick={onAutoFix}
                     disabled={isProcessing || !code.trim()}
-                    className="flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-8 py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/50 disabled:bg-transparent disabled:border-white/5 disabled:text-slate-600 text-white text-sm font-medium transition-all duration-300 rounded-xl backdrop-blur-sm"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                 >

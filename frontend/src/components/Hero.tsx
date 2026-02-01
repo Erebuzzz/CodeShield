@@ -1,188 +1,189 @@
 /**
- * Hero Section - Landing page with animated background
+ * Hero - Clean, Professional Landing
+ * Style: Soft colors, Inter font, minimal icons
  */
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CodeShieldLogoStatic } from './Logo';
-
-const VerifyIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-        <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const StyleIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const MemoryIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
-        <path d="M9 9H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M9 12H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M9 15H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-);
-
-interface FeaturePillProps {
-    icon: React.ReactNode;
-    title: string;
-    color: string;
-    delay: number;
-}
-
-const FeaturePill: React.FC<FeaturePillProps> = ({ icon, title, color, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay }}
-        className="flex items-center gap-3 px-5 py-3 rounded-full border backdrop-blur-sm"
-        style={{
-            borderColor: `${color}40`,
-            backgroundColor: `${color}10`,
-        }}
-    >
-        <span style={{ color }}>{icon}</span>
-        <span className="text-sm font-medium" style={{ color }}>{title}</span>
-    </motion.div>
-);
+import { Logo } from './Logo';
 
 interface HeroProps {
-    onGetStarted: () => void;
+  onGetStarted: () => void;
+  onViewDocs: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onGetStarted }) => {
-    return (
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
-            {/* Content */}
-            <div className="relative z-10 max-w-4xl mx-auto text-center">
-                {/* Badge */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-green-500/30 bg-green-500/10"
-                >
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs font-mono text-green-500 uppercase tracking-wider">
-                        AI Vibe Coding Hackathon 2026
-                    </span>
-                </motion.div>
+export const Hero: React.FC<HeroProps> = ({ onGetStarted, onViewDocs }) => {
+  return (
+    <div className="min-h-screen flex flex-col relative">
+      {/* Navigation */}
+      <nav className="w-full px-6 md:px-12 py-5 relative z-10">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Logo size="md" />
+          
+          <div className="flex items-center gap-8">
+            <button 
+              onClick={onViewDocs}
+              className="text-sm text-slate-400 hover:text-white transition-colors duration-200"
+            >
+              Docs
+            </button>
+            <a 
+              href="https://github.com/Erebuzzz/CodeShield" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-1.5"
+            >
+              <GitHubIcon />
+              GitHub
+            </a>
+            <button
+              onClick={onGetStarted}
+              className="px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm font-medium hover:bg-emerald-500/20 transition-colors duration-200"
+            >
+              Try Demo
+            </button>
+          </div>
+        </div>
+      </nav>
 
-                {/* Logo */}
-                <motion.div
-                    className="flex justify-center mb-6"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, delay: 0.1 }}
-                >
-                    <CodeShieldLogoStatic size={120} />
-                </motion.div>
+      {/* Main Content */}
+      <main className="flex-1 flex items-center justify-center px-6 md:px-12 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 mb-8"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-xs text-slate-300">MCP Protocol Compatible</span>
+          </motion.div>
 
-                {/* Title */}
-                <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="text-6xl md:text-8xl font-bold tracking-tight mb-4"
-                >
-                    <span className="gradient-text">Code</span>
-                    <span className="text-white">Shield</span>
-                </motion.h1>
+          {/* Headline */}
+          <motion.h1 
+            className="text-4xl md:text-6xl font-semibold tracking-tight text-white mb-5 leading-[1.1]"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            Trust your{' '}
+            <span className="text-emerald-400">AI-generated</span>
+            {' '}code
+          </motion.h1>
 
-                {/* Tagline */}
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-xl md:text-2xl text-slate-400 mb-4"
-                >
-                    AI Code That Actually Works
-                </motion.p>
+          {/* Subheadline */}
+          <motion.p 
+            className="text-base md:text-lg text-slate-400 max-w-xl mx-auto mb-10 leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
+            Verify, enforce conventions, and preserve context across your AI coding sessions.
+          </motion.p>
 
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                    className="text-base text-slate-500 max-w-2xl mx-auto mb-10"
-                >
-                    Verify, fix, and enforce conventions on AI-generated code before it breaks your build.
-                    Powered by LLM analysis and sandboxed execution.
-                </motion.p>
+          {/* CTA Buttons */}
+          <motion.div
+            className="flex items-center justify-center gap-3 mb-16"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <button
+              onClick={onGetStarted}
+              className="group px-6 py-3 bg-emerald-500 rounded-lg text-white text-sm font-medium hover:bg-emerald-600 transition-colors duration-200"
+            >
+              <span className="flex items-center gap-2">
+                Get Started
+                <ArrowRightIcon />
+              </span>
+            </button>
+            <button
+              onClick={onViewDocs}
+              className="px-6 py-3 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white text-sm font-medium hover:bg-slate-800 transition-colors duration-200"
+            >
+              Documentation
+            </button>
+          </motion.div>
 
-                {/* Feature Pills */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                    className="flex flex-wrap justify-center gap-4 mb-12"
-                >
-                    <FeaturePill
-                        icon={<VerifyIcon />}
-                        title="TrustGate"
-                        color="#22c55e"
-                        delay={0.6}
-                    />
-                    <FeaturePill
-                        icon={<StyleIcon />}
-                        title="StyleForge"
-                        color="#3b82f6"
-                        delay={0.7}
-                    />
-                    <FeaturePill
-                        icon={<MemoryIcon />}
-                        title="ContextVault"
-                        color="#f59e0b"
-                        delay={0.8}
-                    />
-                </motion.div>
-
-                {/* CTA Button */}
-                <motion.button
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.9 }}
-                    onClick={onGetStarted}
-                    className="group relative px-8 py-4 rounded-lg font-semibold text-lg overflow-hidden"
-                    style={{
-                        background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                >
-                    <span className="relative z-10 text-white flex items-center gap-2">
-                        Try Demo
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </span>
-                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
-                </motion.button>
-
-                {/* Scroll indicator */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.2 }}
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2"
-                >
-                    <motion.div
-                        animate={{ y: [0, 8, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="w-6 h-10 rounded-full border-2 border-slate-600 flex items-start justify-center p-2"
-                    >
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                    </motion.div>
-                </motion.div>
-            </div>
-        </section>
-    );
+          {/* Feature Cards - Larger with more padding */}
+          <motion.div 
+            className="grid md:grid-cols-3 gap-4"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <FeatureCard 
+              icon={<ShieldCheckIcon />}
+              title="TrustGate"
+              description="Verification before acceptance. Catches missing imports, syntax errors, and runtime issues."
+            />
+            <FeatureCard 
+              icon={<SparklesIcon />}
+              title="StyleForge"
+              description="Convention enforcement. Ensures AI code matches your codebase naming patterns."
+            />
+            <FeatureCard 
+              icon={<FolderIcon />}
+              title="ContextVault"
+              description="Context memory save/restore. Resume exactly where you left off with AI briefings."
+            />
+          </motion.div>
+        </div>
+      </main>
+    </div>
+  );
 };
+
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+  return (
+    <div className="p-6 rounded-xl bg-slate-800/30 border border-slate-700/40 text-left hover:border-slate-600/50 transition-colors duration-200">
+      <div className="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center mb-4 text-emerald-400">
+        {icon}
+      </div>
+      <h3 className="text-base font-medium text-white mb-2">{title}</h3>
+      <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
+    </div>
+  );
+};
+
+// Simple, clean icons
+const GitHubIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-0.5 transition-transform">
+    <path d="M5 12h14M12 5l7 7-7 7"/>
+  </svg>
+);
+
+const ShieldCheckIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+    <path d="M9 12l2 2 4-4"/>
+  </svg>
+);
+
+const SparklesIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/>
+    <circle cx="12" cy="12" r="4"/>
+  </svg>
+);
+
+const FolderIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v11z"/>
+  </svg>
+);
 
 export default Hero;

@@ -26,14 +26,6 @@ const AlertTriangleIcon = () => (
     </svg>
 );
 
-const TerminalIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
-        <path d="M6 10L10 14L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M14 18H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-);
-
 const CopyIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2" />
@@ -67,9 +59,9 @@ interface ResultsPanelProps {
 
 const IssueCard: React.FC<{ issue: Issue; index: number }> = ({ issue, index }) => {
     const colors = {
-        error: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', icon: <XCircleIcon /> },
-        warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400', icon: <AlertTriangleIcon /> },
-        info: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400', icon: <CheckCircleIcon /> },
+        error: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', icon: <XCircleIcon /> },
+        warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon /> },
+        info: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', text: 'text-cyan-400', icon: <CheckCircleIcon /> },
     };
 
     const style = colors[issue.type];
@@ -79,21 +71,21 @@ const IssueCard: React.FC<{ issue: Issue; index: number }> = ({ issue, index }) 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            className={`p-4 rounded-lg border ${style.bg} ${style.border}`}
+            className={`p-4 rounded-xl border ${style.bg} ${style.border}`}
         >
             <div className="flex items-start gap-3">
                 <span className={style.text}>{style.icon}</span>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                         {issue.line && (
-                            <span className="text-xs font-mono text-slate-500">Line {issue.line}</span>
+                            <span className="text-xs font-mono text-slate-500 bg-white/5 px-2 py-0.5 rounded">Line {issue.line}</span>
                         )}
                         <span className={`text-xs font-medium uppercase ${style.text}`}>{issue.type}</span>
                     </div>
                     <p className="text-sm text-slate-300">{issue.message}</p>
                     {issue.fix && (
-                        <p className="mt-2 text-xs text-slate-400 font-mono">
-                            💡 Fix: <span className="text-green-400">{issue.fix}</span>
+                        <p className="mt-2 text-xs text-slate-400 font-mono bg-white/5 p-2 rounded-lg">
+                            💡 <span className="text-emerald-400">{issue.fix}</span>
                         </p>
                     )}
                 </div>
@@ -103,12 +95,12 @@ const IssueCard: React.FC<{ issue: Issue; index: number }> = ({ issue, index }) 
 };
 
 const ConfidenceGauge: React.FC<{ value: number }> = ({ value }) => {
-    const color = value >= 80 ? '#22c55e' : value >= 50 ? '#f59e0b' : '#ef4444';
+    const color = value >= 80 ? '#10b981' : value >= 50 ? '#f59e0b' : '#ef4444';
     const circumference = 2 * Math.PI * 45;
     const strokeDashoffset = circumference - (value / 100) * circumference;
 
     return (
-        <div className="relative w-32 h-32">
+        <div className="relative w-28 h-28">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                 {/* Background circle */}
                 <circle
@@ -117,7 +109,7 @@ const ConfidenceGauge: React.FC<{ value: number }> = ({ value }) => {
                     r="45"
                     fill="none"
                     stroke="#1e293b"
-                    strokeWidth="8"
+                    strokeWidth="6"
                 />
                 {/* Progress circle */}
                 <motion.circle
@@ -126,8 +118,7 @@ const ConfidenceGauge: React.FC<{ value: number }> = ({ value }) => {
                     r="45"
                     fill="none"
                     stroke={color}
-                    strokeWidth="8"
-                    strokeLinecap="round"
+                    strokeWidth="6"
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
                     animate={{ strokeDashoffset }}
@@ -136,7 +127,7 @@ const ConfidenceGauge: React.FC<{ value: number }> = ({ value }) => {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <motion.span
-                    className="text-3xl font-bold"
+                    className="text-2xl font-light"
                     style={{ color }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -144,7 +135,6 @@ const ConfidenceGauge: React.FC<{ value: number }> = ({ value }) => {
                 >
                     {value}%
                 </motion.span>
-                <span className="text-xs text-slate-500 uppercase tracking-wider">Confidence</span>
             </div>
         </div>
     );
@@ -168,17 +158,14 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, onApplyFix }
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full max-w-4xl mx-auto mt-8"
+            className="w-full max-w-5xl mx-auto mt-10"
         >
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                    <TerminalIcon />
-                    Verification Results
-                </h2>
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${result.isValid
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-red-500/20 text-red-400'
+            <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl font-semibold text-white">Results</h2>
+                <div className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full ${result.isValid
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {result.isValid ? <CheckCircleIcon /> : <XCircleIcon />}
                     {result.isValid ? 'Verified' : 'Issues Found'}
@@ -188,27 +175,27 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, onApplyFix }
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Confidence Gauge */}
-                <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center">
+                <div className="rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-6 flex flex-col items-center justify-center">
                     <ConfidenceGauge value={result.confidence} />
                     <p className="mt-4 text-sm text-slate-400 text-center">
                         {result.confidence >= 80
-                            ? 'Code looks safe to use'
+                            ? 'Safe to use'
                             : result.confidence >= 50
                                 ? 'Review recommended'
-                                : 'Significant issues detected'}
+                                : 'Issues detected'}
                     </p>
                 </div>
 
                 {/* Issues List */}
-                <div className="md:col-span-2 glass-panel rounded-xl p-6">
-                    <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">
+                <div className="md:col-span-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-6">
+                    <h3 className="text-sm font-medium text-slate-400 mb-4">
                         Issues ({result.issues.length})
                     </h3>
 
                     {result.issues.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-slate-500">
+                        <div className="flex flex-col items-center justify-center py-8 text-slate-600">
                             <CheckCircleIcon />
-                            <p className="mt-2 text-sm">No issues detected</p>
+                            <p className="mt-2 text-xs">No issues detected</p>
                         </div>
                     ) : (
                         <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
@@ -228,20 +215,21 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, onApplyFix }
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="mt-6 glass-panel rounded-xl p-6"
+                    className="mt-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-6"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                            <TerminalIcon />
+                        <h3 className="text-sm font-medium text-slate-400">
                             Sandbox Execution
                         </h3>
-                        <span className={`text-xs font-mono ${result.executionResult.success ? 'text-green-400' : 'text-red-400'
+                        <span className={`text-sm font-mono px-3 py-1 rounded-full ${result.executionResult.success 
+                            ? 'text-emerald-400 bg-emerald-500/10' 
+                            : 'text-red-400 bg-red-500/10'
                             }`}>
                             {result.executionResult.success ? '✓ Passed' : '✗ Failed'}
-                            ({result.executionResult.time_ms}ms)
+                            <span className="text-slate-500 ml-2">{result.executionResult.time_ms}ms</span>
                         </span>
                     </div>
-                    <pre className="bg-black/50 rounded-lg p-4 text-sm font-mono text-slate-300 overflow-x-auto">
+                    <pre className="bg-black/30 p-4 text-sm font-mono text-slate-400 overflow-x-auto rounded-xl">
                         {result.executionResult.output || 'No output'}
                     </pre>
                 </motion.div>
@@ -253,29 +241,29 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ result, onApplyFix }
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="mt-6 glass-panel rounded-xl p-6"
+                    className="mt-6 rounded-2xl bg-gradient-to-b from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-6"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">
-                            🔧 Auto-Fixed Code
+                        <h3 className="text-sm font-medium text-emerald-400">
+                            ✨ Auto-Fixed Code
                         </h3>
                         <div className="flex gap-2">
                             <button
                                 onClick={handleCopyFixed}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded transition-colors"
+                                className="flex items-center gap-1 px-4 py-2 text-xs text-slate-400 hover:text-white border border-white/10 hover:border-white/20 transition-colors duration-300 rounded-lg"
                             >
                                 <CopyIcon />
                                 {copied ? 'Copied!' : 'Copy'}
                             </button>
                             <button
                                 onClick={() => onApplyFix(result.fixedCode!)}
-                                className="px-3 py-1.5 text-xs font-medium text-black bg-green-500 hover:bg-green-400 rounded transition-colors"
+                                className="px-5 py-2 text-xs font-medium text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 rounded-lg"
                             >
                                 Apply Fix
                             </button>
                         </div>
                     </div>
-                    <pre className="bg-black/50 rounded-lg p-4 text-sm font-mono text-green-300 overflow-x-auto max-h-64">
+                    <pre className="bg-black/30 p-4 text-sm font-mono text-emerald-300/80 overflow-x-auto max-h-64 rounded-xl">
                         {result.fixedCode}
                     </pre>
                 </motion.div>
