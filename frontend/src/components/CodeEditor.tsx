@@ -1,170 +1,110 @@
-/**
- * CodeEditor - Code input panel with syntax highlighting
- */
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { verifyCode, type VerificationResult } from '../services/api';
 
-// SVG Icons
-const VerifyIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-        <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+// Icons
+const PlayIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white hover:text-white/80 transition-colors">
+    <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
+  </svg>
 );
 
-const StyleIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const FixIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const CopyIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2" />
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" strokeWidth="2" />
-    </svg>
+const LoaderIcon = () => (
+  <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+  </svg>
 );
 
 interface CodeEditorProps {
-    code: string;
-    onCodeChange: (code: string) => void;
-    onVerify: () => void;
-    onCheckStyle: () => void;
-    onAutoFix: () => void;
-    isProcessing: boolean;
+  code: string;
+  onChange: (code: string) => void;
+  onVerify: (result: VerificationResult) => void;
 }
 
-export const CodeEditor: React.FC<CodeEditorProps> = ({
-    code,
-    onCodeChange,
-    onVerify,
-    onCheckStyle,
-    onAutoFix,
-    isProcessing,
-}) => {
-    const [copied, setCopied] = useState(false);
+export const CodeEditor: React.FC<CodeEditorProps> = ({ code, onChange, onVerify }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const handleVerify = async () => {
+    setIsProcessing(true);
+    try {
+      const result = await verifyCode(code);
+      onVerify(result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+  const lineCount = code.split('\n').length;
 
-    const lineCount = code.split('\n').length;
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-5xl mx-auto"
-        >
-            {/* Editor Container */}
-            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a10]/80 backdrop-blur-sm">
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-                    <div className="flex items-center gap-3">
-                        <div className="flex gap-1.5">
-                            <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                            <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                        </div>
-                        <span className="text-xs text-slate-500 font-mono">input.py</span>
-                    </div>
-
-                    <button
-                        onClick={handleCopy}
-                        className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 hover:text-emerald-400 transition-colors duration-300 rounded-lg hover:bg-white/5"
-                    >
-                        <CopyIcon />
-                        {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                </div>
-
-                {/* Editor */}
-                <div className="relative">
-                    <div className="flex">
-                        {/* Line Numbers */}
-                        <div className="flex-shrink-0 py-4 px-4 bg-white/[0.02] border-r border-white/5 select-none">
-                            {Array.from({ length: Math.max(lineCount, 12) }, (_, i) => (
-                                <div key={i} className="text-xs text-slate-700 font-mono text-right leading-6">
-                                    {i + 1}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Code Area */}
-                        <textarea
-                            value={code}
-                            onChange={(e) => onCodeChange(e.target.value)}
-                            placeholder="# Paste your Python code here..."
-                            className="flex-1 min-h-[320px] p-4 bg-transparent text-slate-300 font-mono text-sm leading-6 resize-none focus:outline-none placeholder:text-slate-600"
-                            style={{ caretColor: '#10b981' }}
-                            spellCheck={false}
-                        />
-                    </div>
-
-                    {/* Processing Overlay */}
-                    {isProcessing && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-b-2xl"
-                        >
-                            <div className="flex flex-col items-center gap-4">
-                                <div className="w-10 h-10 border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
-                                <span className="text-sm text-slate-400">Analyzing code...</span>
-                            </div>
-                        </motion.div>
-                    )}
-                </div>
+  return (
+    <div className="h-full flex flex-col bg-slate-900/30 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-2xl shadow-indigo-500/10">
+      {/* Search Bar / Header */}
+      <div className="bg-white/[0.03] border-b border-white/5 px-4 py-3 flex items-center justify-between">
+        <div className="flex gap-2 items-center">
+            <div className="flex gap-1.5 mr-4">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
             </div>
+            <span className="text-xs font-mono text-slate-500">script.py</span>
+        </div>
+        <div>
+           {/* Maybe some mock status indicators? */}
+        </div>
+      </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 mt-6 justify-center">
-                <motion.button
-                    onClick={onVerify}
-                    disabled={isProcessing || !code.trim()}
-                    className="flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:shadow-lg hover:shadow-emerald-500/25 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-white text-sm font-medium transition-all duration-300 rounded-xl"
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                >
-                    <VerifyIcon />
-                    Verify Code
-                </motion.button>
+      {/* Editor Area */}
+      <div className="relative flex-1 flex overflow-hidden group">
+        {/* Line Numbers */}
+        <div className="w-12 bg-white/[0.01] border-r border-white/5 pt-4 text-right pr-3 select-none text-slate-700 font-mono text-xs leading-6">
+          {Array.from({ length: Math.max(lineCount, 20) }).map((_, i) => (
+            <div key={i}>{i + 1}</div>
+          ))}
+        </div>
 
-                <motion.button
-                    onClick={onCheckStyle}
-                    disabled={isProcessing || !code.trim()}
-                    className="flex items-center gap-2 px-8 py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/50 disabled:bg-transparent disabled:border-white/5 disabled:text-slate-600 text-white text-sm font-medium transition-all duration-300 rounded-xl backdrop-blur-sm"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                >
-                    <StyleIcon />
-                    Check Style
-                </motion.button>
-
-                <motion.button
-                    onClick={onAutoFix}
-                    disabled={isProcessing || !code.trim()}
-                    className="flex items-center gap-2 px-8 py-3.5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/50 disabled:bg-transparent disabled:border-white/5 disabled:text-slate-600 text-white text-sm font-medium transition-all duration-300 rounded-xl backdrop-blur-sm"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                >
-                    <FixIcon />
-                    Auto-Fix
-                </motion.button>
-            </div>
-        </motion.div>
-    );
+        {/* Textarea */}
+        <textarea
+          value={code}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 bg-transparent text-slate-300 font-mono text-xs leading-6 p-4 resize-none focus:outline-none focus:ring-0 custom-scrollbar whitespace-pre"
+          spellCheck={false}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+        />
+        
+        {/* Floating Run Button */}
+        <div className="absolute bottom-6 right-6">
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleVerify}
+                disabled={isProcessing}
+                className={`
+                    h-14 px-6 rounded-full flex items-center gap-3 font-medium transition-all shadow-lg shadow-brand-500/25
+                    ${isProcessing 
+                        ? 'bg-slate-700 cursor-wait text-slate-400' 
+                        : 'bg-gradient-to-r from-brand-500 to-violet-600 text-white hover:shadow-brand-500/40'
+                    }
+                `}
+            >
+                {isProcessing ? (
+                    <>
+                        <LoaderIcon />
+                        <span>Analyzing...</span>
+                    </>
+                ) : (
+                    <>
+                        <PlayIcon />
+                        <span>Run Verification</span>
+                    </>
+                )}
+            </motion.button>
+        </div>
+      </div>
+    </div>
+  );
 };
-
-export default CodeEditor;

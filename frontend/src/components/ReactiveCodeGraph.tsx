@@ -22,13 +22,13 @@ interface Connection {
     active: boolean;
 }
 
-// Vibrant colors for the animated background
+// Deep Techno/Scientific colors for the animated background
 const NODE_COLORS = {
-    function: '#10b981',  // emerald
-    class: '#8b5cf6',     // purple
-    import: '#f59e0b',    // amber
-    variable: '#06b6d4',  // cyan
-    mcp: '#ec4899',       // pink - MCP connections
+    function: '#6366f1',  // Indigo
+    class: '#a855f7',     // Purple
+    import: '#3b82f6',    // Blue
+    variable: '#818cf8',  // Indigo Light
+    mcp: '#ffffff'        // White
 };
 
 const generateNodes = (count: number): Node[] => {
@@ -73,11 +73,15 @@ const generateConnections = (nodes: Node[]): Connection[] => {
 };
 
 interface ReactiveCodeGraphProps {
+    mode?: 'ambient' | 'reactive';
+    code?: string;
     isProcessing?: boolean;
     mcpConnected?: boolean;
 }
 
 export const ReactiveCodeGraph: React.FC<ReactiveCodeGraphProps> = ({ 
+    mode = 'ambient',
+    code = '',
     isProcessing = false,
     mcpConnected = true 
 }) => {
