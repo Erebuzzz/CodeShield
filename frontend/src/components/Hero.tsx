@@ -74,35 +74,31 @@ export const Hero: React.FC<HeroProps> = ({ onGetStarted, onViewDocs }) => {
 
           {/* Subheadline */}
           <motion.p 
-            className="text-base md:text-lg text-slate-400 max-w-xl mx-auto mb-10 leading-relaxed"
+            className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed text-center"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            Verify, enforce conventions, and preserve context across your AI coding sessions.
+            Verify. Enforce conventions. Preserve context.
+            <br />
+            <span className="text-slate-500">The complete safety net for AI coding sessions.</span>
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Button - Single centered */}
           <motion.div
-            className="flex items-center justify-center gap-3 mb-16"
+            className="flex items-center justify-center mb-16"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <button
               onClick={onGetStarted}
-              className="group px-6 py-3 bg-emerald-500 rounded-lg text-white text-sm font-medium hover:bg-emerald-600 transition-colors duration-200"
+              className="group px-8 py-3 bg-emerald-500 rounded-lg text-white text-sm font-medium hover:bg-emerald-600 transition-colors duration-200"
             >
               <span className="flex items-center gap-2">
-                Get Started
+                Demo
                 <ArrowRightIcon />
               </span>
-            </button>
-            <button
-              onClick={onViewDocs}
-              className="px-6 py-3 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white text-sm font-medium hover:bg-slate-800 transition-colors duration-200"
-            >
-              Documentation
             </button>
           </motion.div>
 
