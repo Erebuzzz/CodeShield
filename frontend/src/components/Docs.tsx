@@ -82,11 +82,11 @@ const NavItem: React.FC<{
         onClick={onClick}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-all duration-200 ${
             active 
-                ? 'bg-brand-500/10 text-brand-400 font-medium shadow-[0_0_15px_-3px_rgba(99,102,241,0.2)]' 
+                ? 'bg-emerald-500/10 text-emerald-400 font-medium shadow-[0_0_15px_-3px_rgba(52,211,153,0.2)]' 
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
         }`}
     >
-        <span className={`transition-colors duration-200 ${active ? 'text-brand-400' : 'text-slate-500 group-hover:text-slate-300'}`}>{icon}</span>
+        <span className={`transition-colors duration-200 ${active ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300'}`}>{icon}</span>
         {label}
     </button>
 );
@@ -194,26 +194,71 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                             transition={{ duration: 0.3 }}
                         >
                             {activeSection === 'overview' && (
-                                <div className="space-y-12">
+                                <div className="space-y-16">
                                     <div>
                                         <h1 className="text-4xl md:text-5xl font-display font-medium text-white mb-6">Introduction</h1>
-                                        <p className="text-lg text-slate-400 leading-relaxed font-light max-w-2xl">
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
                                             CodeShield is a secure, intelligent coding assistant designed to protect your codebase from malicious patterns and poor practices. It acts as a firewall for your code generation workflow.
                                         </p>
                                     </div>
 
+                                    {/* Features Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         {[
                                             { title: 'TrustGate', desc: 'Secure Sandbox', icon: <ShieldIcon /> },
                                             { title: 'StyleForge', desc: 'Auto-formatting', icon: <WandIcon /> },
                                             { title: 'ContextVault', desc: 'State Memory', icon: <DatabaseIcon /> },
                                         ].map((feature, i) => (
-                                            <div key={i} className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand-500/30 transition-colors group">
-                                                <div className="mb-4 text-brand-400 group-hover:scale-110 transition-transform origin-left">{feature.icon}</div>
+                                            <div key={i} className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition-colors group">
+                                                <div className="mb-4 text-emerald-400 group-hover:scale-110 transition-transform origin-left">{feature.icon}</div>
                                                 <h3 className="text-lg font-medium text-white mb-2">{feature.title}</h3>
                                                 <p className="text-sm text-slate-400">{feature.desc}</p>
                                             </div>
                                         ))}
+                                    </div>
+
+                                    {/* How It Works Diagram */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-8">How It Works</h2>
+                                        <div className="relative">
+                                            {/* Connecting Line */}
+                                            <div className="absolute left-[19px] top-8 bottom-8 w-0.5 bg-gradient-to-b from-emerald-500/50 via-emerald-500/20 to-transparent hidden md:block"></div>
+                                            
+                                            <div className="space-y-8">
+                                                {[
+                                                    { 
+                                                        title: "Ingestion", 
+                                                        desc: "CodeShield intercepts generated code from your LLM or manual input.",
+                                                        icon: <ApiIcon />
+                                                    },
+                                                    { 
+                                                        title: "Security Scan (TrustGate)", 
+                                                        desc: "Code is executed in an isolated sandbox to detect malicious behavior, network calls, or dangerous imports.",
+                                                        icon: <ShieldIcon />
+                                                    },
+                                                    { 
+                                                        title: "Style Adaptation (StyleForge)", 
+                                                        desc: "The system analyzes your project's existing files to apply consistent naming conventions and formatting rules.",
+                                                        icon: <WandIcon />
+                                                    },
+                                                    { 
+                                                        title: "Delivery", 
+                                                        desc: "The verified, safe, and styled code is returned to your editor, ready for production.",
+                                                        icon: <CheckIcon />
+                                                    }
+                                                ].map((step, i) => (
+                                                    <div key={i} className="relative flex gap-6 group">
+                                                        <div className="relative z-10 shrink-0 w-10 h-10 rounded-full bg-[#0d1117] border border-white/10 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 group-hover:border-emerald-500/50 transition-colors shadow-lg">
+                                                            {step.icon}
+                                                        </div>
+                                                        <div className="pt-1">
+                                                            <h3 className="text-white font-medium mb-1 group-hover:text-emerald-400 transition-colors">{step.title}</h3>
+                                                            <p className="text-sm text-slate-400 leading-relaxed font-light">{step.desc}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -236,7 +281,7 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                                                 "Network isolation in sandboxed execution containers"
                                             ].map((item, i) => (
                                                 <li key={i} className="flex items-start gap-3 text-slate-400 bg-white/[0.01] p-3 rounded-lg border border-white/5">
-                                                    <span className="text-brand-400 mt-1"><CheckIcon /></span>
+                                                    <span className="text-emerald-400 mt-1"><CheckIcon /></span>
                                                     {item}
                                                 </li>
                                             ))}
@@ -280,7 +325,7 @@ def dangerous_operation():
                                                 { title: "Conflict Prevention", desc: "Ensures new identifiers don't clash with existing ones." }
                                             ].map((item, i) => (
                                                 <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                                                    <strong className="text-brand-400 block mb-1">{item.title}</strong>
+                                                    <strong className="text-emerald-400 block mb-1">{item.title}</strong>
                                                     <span className="text-slate-400 text-sm">{item.desc}</span>
                                                 </div>
                                             ))}
@@ -316,18 +361,18 @@ def dangerous_operation():
                                     <div>
                                         <h1 className="text-4xl font-display font-medium text-white mb-4">ContextVault</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            ContextVault acts like a "Save Game" for your development workflow. It captures your entire mental state—open files, cursor positions, and notes—so you can switch tasks without losing focus.
+                                            ContextVault acts like a "Save Game" for your development workflow. It captures your entire mental state: open files, cursor positions, and notes, so you can switch tasks without losing focus.
                                         </p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/5 border border-indigo-500/10">
-                                            <div className="text-indigo-400 mb-3"><DatabaseIcon /></div>
+                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/10">
+                                            <div className="text-emerald-400 mb-3"><DatabaseIcon /></div>
                                             <h3 className="text-white font-medium mb-2">State Persistence</h3>
                                             <p className="text-sm text-slate-400 leading-relaxed">Saves open files, active tabs, and exact cursor locations to a local SQLite database.</p>
                                         </div>
-                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/10">
-                                            <div className="text-emerald-400 mb-3"><WandIcon /></div>
+                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-teal-500/10">
+                                            <div className="text-teal-400 mb-3"><WandIcon /></div>
                                             <h3 className="text-white font-medium mb-2">Instant Restore</h3>
                                             <p className="text-sm text-slate-400 leading-relaxed">One-click restoration brings your IDE back to the exact moment you left off.</p>
                                         </div>
