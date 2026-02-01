@@ -1,103 +1,86 @@
-# CodeShield 🛡️
+# CodeShield
 
-> **The Complete AI Coding Safety Net**  
-> *AI code that works, matches your style, and remembers where you left off*
+An intelligent security layer for AI-generated code. CodeShield validates, formats, and secures code before it enters your production environment, acting as a firewall for your development workflow.
 
-[![Hackathon](https://img.shields.io/badge/AI%20Vibe-Hackathon%202026-purple)](https://devpost.com)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
-[![MCP](https://img.shields.io/badge/MCP-Compatible-green)](https://modelcontextprotocol.io)
+[View Demo](https://codeshield-five.vercel.app/)
 
-## The Problem
+## Capabilities
 
-AI coding assistants give you **90% correct code** that wastes your time:
+### TrustGate
+Validates generated code in an isolated sandbox environment. It detects potential security vulnerabilities, resource exhaustion, and malicious patterns through static analysis and runtime execution.
 
-- ❌ Missing imports (`requests`, `json` not imported)
-- ❌ Wrong variable names (`userName` instead of `user_name`)  
-- ❌ Forgets your codebase conventions
-- ❌ Syntax errors that look right
-- ❌ You lose context when switching tasks
+### StyleForge
+Analyzes your existing codebase to detect and enforce naming conventions. It automatically adapts new code to match your project's snake_case, camelCase, or PascalCase patterns.
 
-## The Solution: 3 Pillars
+### ContextVault
+Persists your development state including open files, cursor positions, and notes. Allows for instant context restoration when switching between tasks.
 
-| Pillar | What It Does |
-|--------|--------------|
-| 🔒 **TrustGate** | Verifies code before you see it |
-| 🎨 **StyleForge** | Enforces YOUR naming conventions |
-| 🧠 **ContextVault** | Saves/restores your coding context |
-
-## Quick Start
+## Installation
 
 ```bash
-# Install
 pip install -e .
-
-# Verify some code
-python -c "
-from codeshield.trustgate.checker import verify_code
-result = verify_code('''
-def fetch():
-    return requests.get(url)
-''')
-print(f'Valid: {result.is_valid}')
-print(f'Issues: {[i.message for i in result.issues]}')
-print(f'Fixed: {result.fixed_code}')
-"
 ```
 
-## Features
+## Python API Usage
 
-### 🔒 TrustGate
-
+### Security Verification
 ```python
 from codeshield.trustgate.checker import verify_code
-from codeshield.trustgate.sandbox import full_verification
 
-# Quick check (static analysis)
+code = """
+def fetch_data(url):
+    return requests.get(url) 
+"""
+
+# Detects missing imports and potential errors
 result = verify_code(code, auto_fix=True)
-
-# Full check (static + sandbox execution)
-report = full_verification(code)
-print(f"Confidence: {report['confidence_score']:.0%}")
+print(result.fixed_code)
 ```
 
-**What it catches:**
-- Missing imports → Auto-adds them
-- Syntax errors → Reports exact line
-- Runtime errors → Catches in sandbox
-
-### 🎨 StyleForge
-
+### Style Enforcement
 ```python
 from codeshield.styleforge.corrector import check_style
 
-# Check code against your codebase conventions
-result = check_style(code, codebase_path="./src")
-
-# Fixes: userName → user_name
-# Fixes: getUserData → get_user_data
+# Enforces project-specific conventions
+result = check_style(
+    code="def GetUserData(): pass", 
+    codebase_path="./src"
+)
+# Output: def get_user_data(): pass
 ```
 
-### 🧠 ContextVault
-
+### Context Management
 ```python
 from codeshield.contextvault.capture import save_context
-from codeshield.contextvault.restore import restore_context
 
-# Save where you are
 save_context(
-    name="debugging-auth",
-    files=["src/auth.py", "src/users.py"],
-    notes="Working on login flow"
+    name="auth-refactor",
+    files=["src/auth.py", "tests/test_auth.py"],
+    notes="fixing token expiration logic"
 )
-
-# Later, restore with AI briefing
-result = restore_context("debugging-auth")
-print(result["briefing"])  # "You were working on login flow..."
 ```
 
-## MCP Integration
+## Model Context Protocol (MCP)
 
-CodeShield works as an MCP server with Claude, Cursor, etc:
+CodeShield exposes its functionality to AI assistants via MCP. Add the following configuration to your MCP settings file:
+
+```json
+{
+  "mcpServers": {
+    "codeshield": {
+      "command": "python",
+      "args": ["-m", "codeshield.mcp.server"]
+    }
+  }
+}
+```
+
+## Development
+
+1. Clone the repository
+2. Install dependencies: `pip install -e .`
+3. Run tests: `pytest`
+4. Start frontend: `cd frontend && npm run dev`
 
 ```json
 {
