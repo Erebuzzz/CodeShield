@@ -286,6 +286,127 @@ async def api_integrations_status():
     }
 
 
+# --- Metrics Endpoints ---
+
+@app.get("/api/metrics")
+async def api_get_metrics():
+    """
+    Get comprehensive CodeShield metrics.
+    
+    Returns transparent, verifiable statistics for:
+    - TrustGate: Detection rates, fix accuracy, sandbox success
+    - StyleForge: Convention detection, corrections
+    - ContextVault: Save/restore stats
+    - Tokens: Usage efficiency, costs
+    """
+    try:
+        from codeshield.utils.metrics import get_metrics
+        
+        metrics = get_metrics()
+        return metrics.get_summary()
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/metrics/trustgate")
+async def api_trustgate_metrics():
+    """Get TrustGate-specific metrics"""
+    try:
+        from codeshield.utils.metrics import get_metrics
+        return get_metrics().trustgate.to_dict()
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/metrics/styleforge")
+async def api_styleforge_metrics():
+    """Get StyleForge-specific metrics"""
+    try:
+        from codeshield.utils.metrics import get_metrics
+        return get_metrics().styleforge.to_dict()
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/metrics/tokens")
+async def api_token_metrics():
+    """
+    Get token utilization metrics.
+    
+    Includes:
+    - Total tokens used (input/output)
+    - Token efficiency ratio
+    - Cost estimates per provider
+    - Average tokens per request
+    """
+    try:
+        from codeshield.utils.metrics import get_metrics
+        return get_metrics().tokens.to_dict()
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/api/metrics/reset")
+async def api_reset_metrics():
+    """Reset all metrics (for testing)"""
+    try:
+        from codeshield.utils.metrics import get_metrics
+        get_metrics().reset()
+        return {"success": True, "message": "Metrics reset"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/tokens/efficiency")
+async def api_token_efficiency():
+    """
+    Get token efficiency and optimization stats.
+    
+    Shows:
+    - Cache hit rate (higher = more savings)
+    - Tokens saved by caching
+    - Budget usage
+    - Session statistics
+    """
+    try:
+        from codeshield.utils.token_optimizer import get_token_optimizer
+        from codeshield.utils.llm import get_provider_stats
+        
+        optimizer = get_token_optimizer()
+        provider_stats = get_provider_stats()
+        
+        return {
+            "optimization": optimizer.get_stats(),
+            "provider_efficiency": {
+                name: {
+                    "token_efficiency": stats.get("token_efficiency", 0),
+                    "avg_tokens_per_call": stats.get("avg_tokens_per_call", 0),
+                    "avg_latency_ms": stats.get("avg_latency_ms", 0),
+                }
+                for name, stats in provider_stats.items()
+            },
+            "tips": [
+                "Cache hit rate > 20% indicates good prompt reuse",
+                "Token efficiency > 1.0 means more output than input (verbose responses)",
+                "Aim for avg_tokens_per_call < 500 for cost efficiency"
+            ]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/api/tokens/budget")
+async def api_set_token_budget(budget: int = 100000):
+    """Set token budget for the session"""
+    try:
+        from codeshield.utils.token_optimizer import get_token_optimizer
+        optimizer = get_token_optimizer()
+        optimizer.set_budget(budget)
+        return {"success": True, "budget": budget}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # --- Frontend Static Serving ---
 
 # Mount assets (CSS/JS)

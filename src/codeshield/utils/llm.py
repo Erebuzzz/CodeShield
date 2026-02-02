@@ -12,6 +12,7 @@ Provider chain ensures high availability with automatic fallback.
 """
 
 import os
+import time
 import httpx
 from typing import Optional
 from dataclasses import dataclass
@@ -24,19 +25,38 @@ class LLMResponse:
     provider: str
     model: str
     tokens_used: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    latency_ms: int = 0
 
 
 # Track provider usage for observability
 _provider_stats = {
-    "cometapi": {"calls": 0, "errors": 0, "tokens": 0},
-    "novita": {"calls": 0, "errors": 0, "tokens": 0},
-    "aiml": {"calls": 0, "errors": 0, "tokens": 0},
+    "cometapi": {"calls": 0, "errors": 0, "tokens": 0, "input_tokens": 0, "output_tokens": 0, "latency_ms": 0},
+    "novita": {"calls": 0, "errors": 0, "tokens": 0, "input_tokens": 0, "output_tokens": 0, "latency_ms": 0},
+    "aiml": {"calls": 0, "errors": 0, "tokens": 0, "input_tokens": 0, "output_tokens": 0, "latency_ms": 0},
 }
 
 
 def get_provider_stats() -> dict:
-    """Get usage statistics for all LLM providers"""
-    return _provider_stats.copy()
+    """Get usage statistics for all LLM providers with efficiency metrics"""
+    stats = {}
+    for provider, data in _provider_stats.items():
+        stats[provider] = data.copy()
+        # Calculate efficiency metrics
+        if data["input_tokens"] > 0:
+            stats[provider]["token_efficiency"] = round(data["output_tokens"] / data["input_tokens"], 3)
+        else:
+            stats[provider]["token_efficiency"] = 0.0
+        if data["calls"] > 0:
+            stats[provider]["avg_tokens_per_call"] = round(data["tokens"] / data["calls"], 1)
+            stats[provider]["avg_latency_ms"] = round(data["latency_ms"] / data["calls"], 1)
+            stats[provider]["error_rate"] = round((data["errors"] / data["calls"]) * 100, 2)
+        else:
+            stats[provider]["avg_tokens_per_call"] = 0.0
+            stats[provider]["avg_latency_ms"] = 0.0
+            stats[provider]["error_rate"] = 0.0
+    return stats
 
 
 class LLMClient:
@@ -140,8 +160,9 @@ class LLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
         
-        # Track call attempt
+        # Track call attempt and timing
         _provider_stats[provider_name]["calls"] += 1
+        start_time = time.time()
         
         try:
             # Use httpx directly (most reliable) - OpenAI-compatible endpoint
@@ -160,14 +181,34 @@ class LLMClient:
             response.raise_for_status()
             data = response.json()
             
-            tokens = data.get("usage", {}).get("total_tokens", 0)
-            _provider_stats[provider_name]["tokens"] += tokens
+            # Extract token usage with efficiency tracking
+            usage = data.get("usage", {})
+            input_tokens = usage.get("prompt_tokens", 0)
+            output_tokens = usage.get("completion_tokens", 0)
+            total_tokens = usage.get("total_tokens", input_tokens + output_tokens)
+            latency_ms = int((time.time() - start_time) * 1000)
+            
+            # Update provider stats
+            _provider_stats[provider_name]["tokens"] += total_tokens
+            _provider_stats[provider_name]["input_tokens"] += input_tokens
+            _provider_stats[provider_name]["output_tokens"] += output_tokens
+            _provider_stats[provider_name]["latency_ms"] += latency_ms
+            
+            # Track in metrics system
+            try:
+                from codeshield.utils.metrics import get_metrics
+                get_metrics().track_tokens(provider_name, input_tokens, output_tokens, success=True)
+            except ImportError:
+                pass
             
             return LLMResponse(
                 content=data["choices"][0]["message"]["content"],
                 provider=provider_name,
                 model=model or config["default_model"],
-                tokens_used=tokens,
+                tokens_used=total_tokens,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                latency_ms=latency_ms,
             )
         except Exception as e:
             print(f"LLM error ({provider_name}): {e}")
@@ -274,28 +315,65 @@ class LLMClient:
             return None
     
     def generate_fix(self, code: str, issues: list[str]) -> Optional[str]:
-        """Generate code fix using LLM"""
-        issues_text = "\n".join(f"- {issue}" for issue in issues)
+        """Generate code fix using LLM - MAXIMUM TOKEN EFFICIENCY"""
+        from codeshield.utils.token_optimizer import (
+            get_token_optimizer, optimize_fix_prompt, 
+            LocalProcessor, ModelTier, get_optimal_max_tokens
+        )
         
-        prompt = f"""Fix the following Python code issues:
-
-Issues found:
-{issues_text}
-
-Original code:
-```python
-{code}
-```
-
-Return ONLY the fixed Python code, no explanations."""
+        optimizer = get_token_optimizer()
+        
+        # 1. TRY LOCAL FIX FIRST (0 tokens!)
+        local_fix = LocalProcessor.fix_locally(code, issues)
+        if local_fix is not None:
+            if not hasattr(optimizer, '_local_saves'):
+                optimizer._local_saves = 0
+            optimizer._local_saves += 1
+            return local_fix
+        
+        # 2. Generate optimized prompt
+        prompt = optimize_fix_prompt(code, issues)
+        
+        # Check if local fix was signaled
+        if prompt == "__LOCAL_FIX__":
+            return LocalProcessor.fix_locally(code, issues)
+        
+        system_prompt = "Fix code. Return code only."  # Ultra short
+        
+        # 3. Check cache
+        cached = optimizer.get_cached(prompt, system_prompt)
+        if cached:
+            return cached.content
+        
+        # 4. Calculate optimal max_tokens (dynamic based on code size)
+        max_tokens = get_optimal_max_tokens("fix", len(code))
+        
+        # 5. Check budget
+        estimated = optimizer.estimate_tokens(prompt) + max_tokens
+        if not optimizer.check_budget(estimated):
+            print("Token budget exceeded")
+            return None
+        
+        # 6. Select optimal model for task complexity
+        provider_info = self._get_available_provider()
+        if provider_info:
+            provider_name = provider_info[0]
+            optimal_model = ModelTier.select_model(code, issues, provider_name)
+        else:
+            optimal_model = None
         
         response = self.chat(
             prompt=prompt,
-            system_prompt="You are a code fixer. Return only valid Python code.",
-            max_tokens=2000,
+            system_prompt=system_prompt,
+            model=optimal_model,
+            max_tokens=max_tokens,
         )
         
         if response:
+            # Cache the response
+            optimizer.cache_response(prompt, response, system_prompt)
+            optimizer.record_usage(response.tokens_used)
+            
             # Extract code from response
             content = response.content
             if "```python" in content:
@@ -306,20 +384,31 @@ Return ONLY the fixed Python code, no explanations."""
         return None
     
     def generate_context_briefing(self, context: dict) -> Optional[str]:
-        """Generate context briefing for returning developer"""
-        prompt = f"""Summarize this coding context in 2-3 sentences for a developer returning to their work:
-
-Context:
-- Files open: {context.get('files', [])}
-- Last edited: {context.get('last_edited', 'unknown')}
-- Recent changes: {context.get('changes', 'none')}
-- Cursor position: {context.get('cursor', 'unknown')}
-
-Be conversational, like: "You were working on X. Last change was Y. Next step might be Z."
-"""
+        """Generate context briefing - MAXIMUM TOKEN EFFICIENCY"""
+        from codeshield.utils.token_optimizer import (
+            get_token_optimizer, optimize_context_prompt, get_optimal_max_tokens
+        )
         
-        response = self.chat(prompt=prompt, max_tokens=200)
-        return response.content if response else None
+        optimizer = get_token_optimizer()
+        
+        # Use optimized prompt
+        prompt = optimize_context_prompt(context)
+        
+        # Check cache
+        cached = optimizer.get_cached(prompt)
+        if cached:
+            return cached.content
+        
+        # Dynamic max_tokens (very short for briefings)
+        max_tokens = get_optimal_max_tokens("briefing", 0)
+        
+        response = self.chat(prompt=prompt, max_tokens=max_tokens)
+        
+        if response:
+            optimizer.cache_response(prompt, response)
+            optimizer.record_usage(response.tokens_used)
+            return response.content
+        return None
 
 
 # Singleton instance

