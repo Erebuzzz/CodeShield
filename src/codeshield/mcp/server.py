@@ -1,12 +1,18 @@
 """
-MCP Server - Proper FastMCP implementation
+MCP Server - Proper FastMCP implementation with LeanMCP Observability
 
 Uses the official MCP Python SDK (FastMCP) to expose CodeShield tools
 as a proper MCP server that integrates with Claude, Cursor, etc.
+
+Integrations:
+- FastMCP: MCP protocol implementation
+- LeanMCP: Observability, metrics, and analytics tracking
+- CometAPI/Novita/AIML: LLM providers for code fixes
 """
 
 from typing import Optional, Any
 import json
+import time
 
 # Try to import FastMCP, fallback to simple HTTP if not available
 try:
@@ -18,12 +24,16 @@ except ImportError:
 
 
 def create_mcp_server():
-    """Create and configure the CodeShield MCP server"""
+    """Create and configure the CodeShield MCP server with LeanMCP observability"""
     
     if not HAS_FASTMCP:
         raise ImportError(
             "MCP SDK not installed. Run: pip install mcp"
         )
+    
+    # Initialize LeanMCP tracking
+    from codeshield.utils.leanmcp import get_leanmcp_client
+    leanmcp = get_leanmcp_client()
     
     # Create FastMCP server
     mcp = FastMCP("CodeShield")
@@ -44,10 +54,18 @@ def create_mcp_server():
         Returns:
             Verification report with issues, fixes, and confidence score
         """
-        from codeshield.trustgate.checker import verify_code as _verify
-        
-        result = _verify(code, auto_fix=auto_fix)
-        return result.to_dict()
+        start_time = time.time()
+        try:
+            from codeshield.trustgate.checker import verify_code as _verify
+            
+            result = _verify(code, auto_fix=auto_fix)
+            duration_ms = int((time.time() - start_time) * 1000)
+            leanmcp.track_tool_call("verify_code", duration_ms=duration_ms, success=True)
+            return result.to_dict()
+        except Exception as e:
+            duration_ms = int((time.time() - start_time) * 1000)
+            leanmcp.track_tool_call("verify_code", duration_ms=duration_ms, success=False, error_message=str(e))
+            raise
     
     # ============================================
     # TOOL: full_verify (with sandbox execution)
@@ -56,7 +74,7 @@ def create_mcp_server():
     def full_verify(code: str) -> dict:
         """
         Complete verification: syntax + imports + sandbox execution.
-        Runs code in secure sandbox to confirm it actually works.
+        Runs code in secure sandbox (Daytona) to confirm it actually works.
         
         Args:
             code: Python code to verify
@@ -64,9 +82,18 @@ def create_mcp_server():
         Returns:
             Comprehensive verification report including execution results
         """
-        from codeshield.trustgate.sandbox import full_verification
-        
-        return full_verification(code)
+        start_time = time.time()
+        try:
+            from codeshield.trustgate.sandbox import full_verification
+            
+            result = full_verification(code)
+            duration_ms = int((time.time() - start_time) * 1000)
+            leanmcp.track_tool_call("full_verify", duration_ms=duration_ms, success=True)
+            return result
+        except Exception as e:
+            duration_ms = int((time.time() - start_time) * 1000)
+            leanmcp.track_tool_call("full_verify", duration_ms=duration_ms, success=False, error_message=str(e))
+            raise
     
     # ============================================
     # TOOL: check_style
@@ -84,10 +111,18 @@ def create_mcp_server():
         Returns:
             Style check results with issues and corrections
         """
-        from codeshield.styleforge.corrector import check_style as _check
-        
-        result = _check(code, codebase_path)
-        return result.to_dict()
+        start_time = time.time()
+        try:
+            from codeshield.styleforge.corrector import check_style as _check
+            
+            result = _check(code, codebase_path)
+            duration_ms = int((time.time() - start_time) * 1000)
+            leanmcp.track_tool_call("check_style", duration_ms=duration_ms, success=True)
+            return result.to_dict()
+        except Exception as e:
+            duration_ms = int((time.time() - start_time) * 1000)
+            leanmcp.track_tool_call("check_style", duration_ms=duration_ms, success=False, error_message=str(e))
+            raise
     
     # ============================================
     # TOOL: save_context
@@ -154,6 +189,121 @@ def create_mcp_server():
         from codeshield.contextvault.capture import list_contexts as _list
         
         return _list()
+    
+    # ============================================
+    # TOOL: mcp_health (Observability)
+    # ============================================
+    @mcp.tool()
+    def mcp_health() -> dict:
+        """
+        Check MCP server health and connectivity status.
+        Returns status of all integrated services and providers.
+        
+        Use this to verify:
+        - MCP server is running correctly
+        - LLM providers are configured (CometAPI, Novita, AIML)
+        - All CodeShield modules are loaded
+        
+        Returns:
+            Health status with provider configurations and stats
+        """
+        from codeshield.utils.llm import get_llm_client, get_provider_stats
+        
+        # Check LLM providers
+        llm = get_llm_client()
+        provider_status = llm.get_status()
+        provider_stats = get_provider_stats()
+        
+        # Check module availability
+        modules_status = {}
+        try:
+            from codeshield.trustgate import checker
+            modules_status["trustgate"] = "loaded"
+        except ImportError:
+            modules_status["trustgate"] = "not_available"
+        
+        try:
+            from codeshield.styleforge import corrector
+            modules_status["styleforge"] = "loaded"
+        except ImportError:
+            modules_status["styleforge"] = "not_available"
+        
+        try:
+            from codeshield.contextvault import capture
+            modules_status["contextvault"] = "loaded"
+        except ImportError:
+            modules_status["contextvault"] = "not_available"
+        
+        # Get LeanMCP metrics
+        leanmcp_status = leanmcp.get_status()
+        leanmcp_metrics = leanmcp.get_metrics()
+        
+        # Check Daytona configuration
+        import os
+        daytona_configured = bool(os.getenv("DAYTONA_API_KEY"))
+        
+        return {
+            "status": "healthy",
+            "mcp_server": "CodeShield",
+            "version": "1.0.0",
+            "integrations": {
+                "leanmcp": leanmcp_status,
+                "daytona": {
+                    "configured": daytona_configured,
+                    "api_url": os.getenv("DAYTONA_API_URL", "https://app.daytona.io/api")
+                }
+            },
+            "llm_providers": provider_status,
+            "llm_stats": provider_stats,
+            "mcp_metrics": leanmcp_metrics,
+            "modules": modules_status,
+            "message": "MCP server is running with LeanMCP observability."
+        }
+    
+    # ============================================
+    # TOOL: test_llm_connection
+    # ============================================
+    @mcp.tool()
+    def test_llm_connection(provider: str = None) -> dict:
+        """
+        Test LLM provider connectivity with a simple request.
+        
+        Args:
+            provider: Optional specific provider to test (cometapi, novita, aiml)
+                     If not specified, tests the first available provider.
+        
+        Returns:
+            Connection test result with provider used and response time
+        """
+        import time
+        from codeshield.utils.llm import get_llm_client
+        
+        llm = get_llm_client()
+        if provider:
+            llm.preferred_provider = provider
+        
+        start_time = time.time()
+        response = llm.chat(
+            prompt="Reply with exactly: 'CodeShield MCP connected'",
+            max_tokens=20
+        )
+        elapsed = time.time() - start_time
+        
+        if response:
+            return {
+                "success": True,
+                "provider": response.provider,
+                "model": response.model,
+                "response": response.content,
+                "response_time_ms": round(elapsed * 1000),
+                "tokens_used": response.tokens_used
+            }
+        else:
+            return {
+                "success": False,
+                "error": "No LLM provider available or all providers failed",
+                "hint": "Check that at least one of COMETAPI_KEY, NOVITA_API_KEY, or AIML_API_KEY is set"
+            }
     
     return mcp
 

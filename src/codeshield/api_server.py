@@ -118,6 +118,174 @@ async def api_list_contexts():
     result = list_contexts()
     return result
 
+
+# --- Observability Endpoints ---
+
+@app.get("/api/providers/status")
+async def api_provider_status():
+    """
+    Get status of all LLM providers (CometAPI, Novita, AIML).
+    Useful for checking which providers are configured and their usage stats.
+    """
+    try:
+        from codeshield.utils.llm import get_llm_client, get_provider_stats
+        
+        llm = get_llm_client()
+        status = llm.get_status()
+        stats = get_provider_stats()
+        
+        return {
+            "providers": status,
+            "usage_stats": stats,
+            "active_provider": next(
+                (name for name, info in status.items() if info["configured"]),
+                None
+            )
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/providers/test")
+async def api_test_provider(provider: str = None):
+    """
+    Test LLM provider connectivity.
+    Query param: ?provider=cometapi|novita|aiml
+    """
+    try:
+        import time
+        from codeshield.utils.llm import get_llm_client
+        
+        llm = get_llm_client()
+        if provider:
+            llm.preferred_provider = provider
+        
+        start_time = time.time()
+        response = llm.chat(
+            prompt="Reply with exactly: 'CodeShield connected'",
+            max_tokens=20
+        )
+        elapsed = time.time() - start_time
+        
+        if response:
+            return {
+                "success": True,
+                "provider": response.provider,
+                "model": response.model,
+                "response": response.content,
+                "response_time_ms": round(elapsed * 1000),
+                "tokens_used": response.tokens_used
+            }
+        else:
+            return {
+                "success": False,
+                "error": "No LLM provider available",
+                "hint": "Set COMETAPI_KEY, NOVITA_API_KEY, or AIML_API_KEY in .env"
+            }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.get("/api/mcp/status")
+async def api_mcp_status():
+    """
+    Check if MCP server components are available.
+    """
+    try:
+        from mcp.server.fastmcp import FastMCP
+        mcp_available = True
+    except ImportError:
+        mcp_available = False
+    
+    return {
+        "mcp_sdk_installed": mcp_available,
+        "mcp_config": "mcp_config.json",
+        "tools_available": [
+            "verify_code", "full_verify", "check_style",
+            "save_context", "restore_context", "list_contexts",
+            "mcp_health", "test_llm_connection"
+        ] if mcp_available else [],
+        "usage": "Add mcp_config.json to your Claude/Cursor MCP settings"
+    }
+
+
+@app.get("/api/leanmcp/status")
+async def api_leanmcp_status():
+    """
+    Get LeanMCP integration status and metrics.
+    """
+    try:
+        from codeshield.utils.leanmcp import get_leanmcp_client
+        
+        client = get_leanmcp_client()
+        return {
+            "status": client.get_status(),
+            "metrics": client.get_metrics(),
+            "configured": client.is_configured()
+        }
+    except Exception as e:
+        return {"error": str(e), "configured": False}
+
+
+@app.get("/api/leanmcp/health")
+async def api_leanmcp_health():
+    """
+    Report and retrieve health status via LeanMCP.
+    """
+    try:
+        from codeshield.utils.leanmcp import get_leanmcp_client
+        
+        client = get_leanmcp_client()
+        return client.report_health()
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
+
+@app.get("/api/integrations/status")
+async def api_integrations_status():
+    """
+    Get status of ALL required integrations.
+    """
+    import os
+    
+    integrations = {
+        "cometapi": {
+            "configured": bool(os.getenv("COMETAPI_KEY")),
+            "env_var": "COMETAPI_KEY",
+            "docs": "https://apidoc.cometapi.com/"
+        },
+        "novita": {
+            "configured": bool(os.getenv("NOVITA_API_KEY")),
+            "env_var": "NOVITA_API_KEY",
+            "docs": "https://novita.ai/docs/guides/llm-api"
+        },
+        "aiml": {
+            "configured": bool(os.getenv("AIML_API_KEY")),
+            "env_var": "AIML_API_KEY",
+        },
+        "daytona": {
+            "configured": bool(os.getenv("DAYTONA_API_KEY")),
+            "env_var": "DAYTONA_API_KEY",
+            "api_url": os.getenv("DAYTONA_API_URL"),
+            "docs": "https://www.daytona.io/docs"
+        },
+        "leanmcp": {
+            "configured": bool(os.getenv("LEANMCP_KEY")),
+            "env_var": "LEANMCP_KEY",
+            "api_url": os.getenv("LEANMCP_API_URL"),
+            "docs": "https://docs.leanmcp.com/"
+        }
+    }
+    
+    all_configured = all(i["configured"] for i in integrations.values())
+    
+    return {
+        "all_configured": all_configured,
+        "integrations": integrations,
+        "message": "All integrations configured!" if all_configured else "Some integrations missing. Check .env file."
+    }
+
+
 # --- Frontend Static Serving ---
 
 # Mount assets (CSS/JS)

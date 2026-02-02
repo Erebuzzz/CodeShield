@@ -1,10 +1,14 @@
 """
 LLM Utility - Multi-provider AI integration
 
-Supports:
-- CometAPI (primary, free tier)
-- Novita.ai (fallback, cheap)
-- AI/ML API (last resort)
+Supports (in priority order):
+- CometAPI (primary) - OpenAI-compatible unified gateway to 100+ models
+  Docs: https://apidoc.cometapi.com/
+- Novita.ai (secondary) - Cost-effective open-source model inference
+  Docs: https://novita.ai/docs/guides/llm-api
+- AI/ML API (fallback)
+
+Provider chain ensures high availability with automatic fallback.
 """
 
 import os
@@ -22,26 +26,75 @@ class LLMResponse:
     tokens_used: int = 0
 
 
+# Track provider usage for observability
+_provider_stats = {
+    "cometapi": {"calls": 0, "errors": 0, "tokens": 0},
+    "novita": {"calls": 0, "errors": 0, "tokens": 0},
+    "aiml": {"calls": 0, "errors": 0, "tokens": 0},
+}
+
+
+def get_provider_stats() -> dict:
+    """Get usage statistics for all LLM providers"""
+    return _provider_stats.copy()
+
+
 class LLMClient:
-    """Multi-provider LLM client with automatic fallback"""
+    """
+    Multi-provider LLM client with automatic fallback.
+    
+    Provider Priority:
+    1. CometAPI - Unified gateway with free tier models (deepseek-chat)
+    2. Novita.ai - OpenAI-compatible API for open-source models
+    3. AIML API - Backup provider
+    
+    All providers use OpenAI-compatible /v1/chat/completions endpoint.
+    """
     
     PROVIDERS = {
         "cometapi": {
             "base_url": "https://api.cometapi.com/v1",
             "env_key": "COMETAPI_KEY",
-            "default_model": "deepseek-chat",  # Free model
+            "default_model": "deepseek-chat",  # Free model on CometAPI
             "free_models": ["deepseek-chat", "deepseek-reasoner", "llama-4-maverick"],
+            "description": "CometAPI - Unified AI gateway (100+ models)",
+        },
+        "novita": {
+            "base_url": "https://api.novita.ai/openai/v1",
+            "env_key": "NOVITA_API_KEY",
+            "default_model": "deepseek/deepseek-r1",  # Strong open-source model
+            "free_models": ["meta-llama/llama-3-8b-instruct"],
+            "description": "Novita.ai - Cost-effective inference platform",
         },
         "aiml": {
             "base_url": "https://api.aimlapi.com/v1",
             "env_key": "AIML_API_KEY",
             "default_model": "gpt-4o-mini",
+            "description": "AIML API - Fallback provider",
         },
     }
     
     def __init__(self, preferred_provider: Optional[str] = None):
         self.preferred_provider = preferred_provider
         self._client = httpx.Client(timeout=60.0)
+    
+    def get_status(self) -> dict:
+        """
+        Get status of all configured LLM providers.
+        Useful for observability and debugging connectivity.
+        """
+        status = {}
+        for name, config in self.PROVIDERS.items():
+            api_key = os.getenv(config["env_key"])
+            status[name] = {
+                "configured": bool(api_key),
+                "env_var": config["env_key"],
+                "base_url": config["base_url"],
+                "default_model": config["default_model"],
+                "description": config.get("description", ""),
+                "stats": _provider_stats.get(name, {}),
+            }
+        return status
     
     def _get_available_provider(self) -> Optional[tuple[str, dict]]:
         """Get first available provider with valid API key"""
@@ -87,8 +140,11 @@ class LLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
         
+        # Track call attempt
+        _provider_stats[provider_name]["calls"] += 1
+        
         try:
-            # Use httpx directly (most reliable)
+            # Use httpx directly (most reliable) - OpenAI-compatible endpoint
             response = self._client.post(
                 f"{config['base_url']}/chat/completions",
                 headers={
@@ -104,18 +160,71 @@ class LLMClient:
             response.raise_for_status()
             data = response.json()
             
+            tokens = data.get("usage", {}).get("total_tokens", 0)
+            _provider_stats[provider_name]["tokens"] += tokens
+            
             return LLMResponse(
                 content=data["choices"][0]["message"]["content"],
                 provider=provider_name,
                 model=model or config["default_model"],
-                tokens_used=data.get("usage", {}).get("total_tokens", 0),
+                tokens_used=tokens,
             )
         except Exception as e:
             print(f"LLM error ({provider_name}): {e}")
-            # Try next provider
+            _provider_stats[provider_name]["errors"] += 1
+            # Try fallback chain: cometapi -> novita -> aiml
             if provider_name == "cometapi":
+                return self._try_novita(prompt, system_prompt, model, max_tokens)
+            elif provider_name == "novita":
                 return self._try_aiml(prompt, system_prompt, model, max_tokens)
             return None
+    
+    def _try_novita(self, prompt: str, system_prompt: Optional[str], model: Optional[str], max_tokens: int) -> Optional[LLMResponse]:
+        """Fallback to Novita.ai API"""
+        config = self.PROVIDERS.get("novita")
+        if not config:
+            return self._try_aiml(prompt, system_prompt, model, max_tokens)
+        
+        api_key = os.getenv(config["env_key"])
+        if not api_key:
+            return self._try_aiml(prompt, system_prompt, model, max_tokens)
+        
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+        
+        _provider_stats["novita"]["calls"] += 1
+        
+        try:
+            response = self._client.post(
+                f"{config['base_url']}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": model or config["default_model"],
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            tokens = data.get("usage", {}).get("total_tokens", 0)
+            _provider_stats["novita"]["tokens"] += tokens
+            
+            return LLMResponse(
+                content=data["choices"][0]["message"]["content"],
+                provider="novita",
+                model=model or config["default_model"],
+                tokens_used=tokens,
+            )
+        except Exception as e:
+            print(f"Novita error: {e}")
+            _provider_stats["novita"]["errors"] += 1
+            return self._try_aiml(prompt, system_prompt, model, max_tokens)
     
     def _try_aiml(self, prompt: str, system_prompt: Optional[str], model: Optional[str], max_tokens: int) -> Optional[LLMResponse]:
         """Fallback to AIML API"""
@@ -132,6 +241,8 @@ class LLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
         
+        _provider_stats["aiml"]["calls"] += 1
+        
         try:
             response = self._client.post(
                 f"{config['base_url']}/chat/completions",
@@ -148,14 +259,18 @@ class LLMClient:
             response.raise_for_status()
             data = response.json()
             
+            tokens = data.get("usage", {}).get("total_tokens", 0)
+            _provider_stats["aiml"]["tokens"] += tokens
+            
             return LLMResponse(
                 content=data["choices"][0]["message"]["content"],
                 provider="aiml",
                 model=model or config["default_model"],
-                tokens_used=data.get("usage", {}).get("total_tokens", 0),
+                tokens_used=tokens,
             )
         except Exception as e:
             print(f"AIML error: {e}")
+            _provider_stats["aiml"]["errors"] += 1
             return None
     
     def generate_fix(self, code: str, issues: list[str]) -> Optional[str]:

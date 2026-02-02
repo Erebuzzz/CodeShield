@@ -6,7 +6,7 @@ interface DocsProps {
     onBack?: () => void;
 }
 
-type DocSection = 'overview' | 'trustgate' | 'styleforge' | 'contextvault' | 'mcp' | 'api';
+type DocSection = 'overview' | 'trustgate' | 'styleforge' | 'contextvault' | 'mcp' | 'api' | 'faq' | 'troubleshooting';
 
 // Icons
 const BookIcon = () => (
@@ -35,6 +35,12 @@ const CopyIcon = () => (
 );
 const CheckIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+);
+const QuestionIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+);
+const WrenchIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
 );
 
 const CodeBlock: React.FC<{ code: string; title?: string }> = ({ code, title }) => {
@@ -181,6 +187,22 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                                 onClick={() => setActiveSection('api')}
                                 icon={<ApiIcon />}
                                 label="API Reference"
+                            />
+                        </nav>
+                        
+                        <div className="mb-6 px-3 text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-8">Help</div>
+                        <nav className="space-y-1">
+                            <NavItem 
+                                active={activeSection === 'faq'} 
+                                onClick={() => setActiveSection('faq')}
+                                icon={<QuestionIcon />}
+                                label="FAQ"
+                            />
+                            <NavItem 
+                                active={activeSection === 'troubleshooting'} 
+                                onClick={() => setActiveSection('troubleshooting')}
+                                icon={<WrenchIcon />}
+                                label="Troubleshooting"
                             />
                         </nav>
                     </aside>
@@ -406,24 +428,126 @@ def dangerous_operation():
                                     <div>
                                         <h1 className="text-4xl font-display font-medium text-white mb-4">MCP Server Integration</h1>
                                         <p className="text-lg text-slate-400 leading-relaxed font-light">
-                                            CodeShield exposes functionality via the Model Context Protocol (MCP), allowing AI models to leverage secure execution and validation capabilities directly.
+                                            CodeShield exposes functionality via the Model Context Protocol (MCP), allowing AI models like Claude and Cursor to leverage secure execution and validation capabilities directly.
                                         </p>
                                     </div>
 
-                                    <CodeBlock 
-                                        title="mcp_config.json"
-                                        code={`{
-  "name": "verify_code",
-  "description": "Verify code security and correctness",
-  "inputSchema": {
-    "type": "object",
-    "properties": {
-      "code": { "type": "string" }
-    },
-    "required": ["code"]
+                                    {/* Available Tools */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">Available MCP Tools</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {[
+                                                { name: "verify_code", desc: "Verify Python code for syntax errors and issues" },
+                                                { name: "full_verify", desc: "Complete verification with sandbox execution" },
+                                                { name: "check_style", desc: "Check code against codebase conventions" },
+                                                { name: "save_context", desc: "Save current coding context" },
+                                                { name: "restore_context", desc: "Restore a previously saved context" },
+                                                { name: "list_contexts", desc: "List all saved contexts" },
+                                                { name: "mcp_health", desc: "Check MCP server and provider status" },
+                                                { name: "test_llm_connection", desc: "Test LLM provider connectivity" }
+                                            ].map((tool, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                                    <code className="text-emerald-400 text-sm">{tool.name}</code>
+                                                    <p className="text-slate-400 text-xs mt-1">{tool.desc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Configuration */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Configuration</h2>
+                                        <p className="text-slate-400 mb-4">Add this to your Claude Desktop or Cursor MCP settings:</p>
+                                        <CodeBlock 
+                                            title="mcp_config.json"
+                                            code={`{
+  "mcpServers": {
+    "codeshield": {
+      "command": "python",
+      "args": ["-m", "codeshield.mcp.server"],
+      "cwd": "\${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "\${workspaceFolder}/src"
+      }
+    }
   }
 }`}
-                                    />
+                                        />
+                                    </div>
+
+                                    {/* Observability */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Checking Connectivity</h2>
+                                        <p className="text-slate-400 mb-4">Use these tools to verify MCP is working:</p>
+                                        <CodeBlock 
+                                            title="In Claude/Cursor"
+                                            code={`# Check server health and provider status
+mcp_health()
+
+# Test LLM connection (uses first available provider)
+test_llm_connection()
+
+# Test specific provider
+test_llm_connection(provider="cometapi")
+test_llm_connection(provider="novita")`}
+                                        />
+                                    </div>
+
+                                    {/* LLM Providers */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Supported LLM Providers</h2>
+                                        <div className="space-y-3">
+                                            {[
+                                                { 
+                                                    name: "CometAPI", 
+                                                    desc: "Unified gateway to 100+ models (primary LLM)", 
+                                                    url: "apidoc.cometapi.com",
+                                                    envVar: "COMETAPI_KEY",
+                                                    required: true
+                                                },
+                                                { 
+                                                    name: "Novita.ai", 
+                                                    desc: "Cost-effective open-source inference (secondary LLM)", 
+                                                    url: "novita.ai/docs",
+                                                    envVar: "NOVITA_API_KEY",
+                                                    required: true
+                                                },
+                                                { 
+                                                    name: "AIML API", 
+                                                    desc: "Fallback LLM provider", 
+                                                    url: "aimlapi.com",
+                                                    envVar: "AIML_API_KEY",
+                                                    required: true
+                                                },
+                                                { 
+                                                    name: "Daytona", 
+                                                    desc: "Secure sandbox execution environment", 
+                                                    url: "daytona.io/docs",
+                                                    envVar: "DAYTONA_API_KEY",
+                                                    required: true
+                                                },
+                                                { 
+                                                    name: "LeanMCP", 
+                                                    desc: "MCP observability & analytics platform", 
+                                                    url: "docs.leanmcp.com",
+                                                    envVar: "LEANMCP_KEY",
+                                                    required: true
+                                                }
+                                            ].map((provider, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/5 to-transparent border border-emerald-500/10">
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <strong className="text-white">{provider.name}</strong>
+                                                            <span className="text-slate-400 text-sm ml-2">- {provider.desc}</span>
+                                                            {provider.required && <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/20">Required</span>}
+                                                        </div>
+                                                        <code className="text-xs text-slate-500">{provider.envVar}</code>
+                                                    </div>
+                                                    <a href={`https://${provider.url}`} target="_blank" rel="noopener" className="text-emerald-400 text-xs hover:underline">{provider.url}</a>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -471,6 +595,184 @@ def dangerous_operation():
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection === 'faq' && (
+                                <div className="space-y-10">
+                                    <div>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">Frequently Asked Questions</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                            Common questions about CodeShield, its features, and required integrations.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {[
+                                            {
+                                                q: "What integrations are required?",
+                                                a: "CodeShield requires: CometAPI (primary LLM), Novita.ai (secondary LLM), AIML API (fallback), Daytona (sandbox execution), and LeanMCP (observability). All keys must be configured in .env for full functionality."
+                                            },
+                                            {
+                                                q: "How do I check if all services are connected?",
+                                                a: "Use GET /api/integrations/status to check all services, or mcp_health() in Claude/Cursor. The API will show which integrations are configured and their current status."
+                                            },
+                                            {
+                                                q: "What is CometAPI?",
+                                                a: "CometAPI is a unified AI gateway providing access to 100+ models (GPT, Claude, Llama, DeepSeek) through a single OpenAI-compatible API. It's the primary LLM provider with free tier models like deepseek-chat. Docs: apidoc.cometapi.com"
+                                            },
+                                            {
+                                                q: "What is Novita.ai used for?",
+                                                a: "Novita.ai is the secondary LLM provider offering cost-effective inference for open-source models like DeepSeek-R1. It automatically takes over if CometAPI fails. Docs: novita.ai/docs"
+                                            },
+                                            {
+                                                q: "What is LeanMCP?",
+                                                a: "LeanMCP provides production-grade MCP infrastructure with observability, metrics tracking, and analytics. It tracks tool usage, performance, and health status across all MCP calls. Docs: docs.leanmcp.com"
+                                            },
+                                            {
+                                                q: "What is Daytona used for?",
+                                                a: "Daytona provides secure sandbox execution for the full_verify tool. It runs untrusted code in an isolated environment to detect runtime issues without risking the host system. Docs: daytona.io/docs"
+                                            },
+                                            {
+                                                q: "How do I integrate CodeShield with Claude Desktop?",
+                                                a: "Add the mcp_config.json configuration to your Claude Desktop settings. This registers CodeShield's tools (verify_code, check_style, etc.) so Claude can use them during conversations."
+                                            },
+                                            {
+                                                q: "Is the sandbox execution secure?",
+                                                a: "Yes, TrustGate runs code in an isolated environment with resource limits, network isolation, and restricted imports. Dangerous operations are blocked before execution."
+                                            },
+                                            {
+                                                q: "What's the difference between verify_code and full_verify?",
+                                                a: "verify_code does fast static analysis (AST parsing, import checking). full_verify additionally runs code in a sandboxed environment to catch runtime issues like infinite loops."
+                                            }
+                                        ].map((faq, i) => (
+                                            <div key={i} className="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/20 transition-colors">
+                                                <h3 className="text-white font-medium mb-3 flex items-start gap-3">
+                                                    <span className="text-emerald-400 mt-0.5"><QuestionIcon /></span>
+                                                    {faq.q}
+                                                </h3>
+                                                <p className="text-slate-400 text-sm leading-relaxed pl-7">{faq.a}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection === 'troubleshooting' && (
+                                <div className="space-y-10">
+                                    <div>
+                                        <h1 className="text-4xl font-display font-medium text-white mb-4">Troubleshooting</h1>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-light">
+                                            Common issues and their solutions when working with CodeShield.
+                                        </p>
+                                    </div>
+
+                                    {/* Connectivity Issues */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">LLM Provider Issues</h2>
+                                        <div className="space-y-4">
+                                            {[
+                                                {
+                                                    issue: "LLM observability shows 0 calls",
+                                                    solution: "Check that at least one API key is set in .env (COMETAPI_KEY, NOVITA_API_KEY, or AIML_API_KEY). Test connectivity with GET /api/providers/test."
+                                                },
+                                                {
+                                                    issue: "CometAPI returns 401 Unauthorized",
+                                                    solution: "Verify your API key at api.cometapi.com/console/token. Ensure the key starts with 'sk-' and is correctly copied without extra spaces."
+                                                },
+                                                {
+                                                    issue: "Novita.ai requests failing",
+                                                    solution: "Check your credit balance at novita.ai/billing. The API requires a positive balance. Verify the key at novita.ai/settings/key-management."
+                                                },
+                                                {
+                                                    issue: "All providers failing (fallback exhausted)",
+                                                    solution: "Check network connectivity. Verify .env file is in the project root. Restart the server after changing environment variables."
+                                                }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-red-500/5 border border-red-500/10">
+                                                    <strong className="text-red-400 block mb-2">❌ {item.issue}</strong>
+                                                    <span className="text-slate-400 text-sm">✅ {item.solution}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* MCP Issues */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">MCP Server Issues</h2>
+                                        <div className="space-y-4">
+                                            {[
+                                                {
+                                                    issue: "MCP tools not appearing in Claude/Cursor",
+                                                    solution: "Ensure mcp_config.json is added to your MCP client settings. Check PYTHONPATH includes ./src. Restart the MCP client."
+                                                },
+                                                {
+                                                    issue: "'mcp' module not found",
+                                                    solution: "Install the MCP SDK: pip install mcp. This is required for the FastMCP server implementation."
+                                                },
+                                                {
+                                                    issue: "mcp_health returns empty provider stats",
+                                                    solution: "This is normal on fresh start. Stats accumulate as LLM calls are made. Make a test call to populate stats."
+                                                }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                                                    <strong className="text-amber-400 block mb-2">⚠️ {item.issue}</strong>
+                                                    <span className="text-slate-400 text-sm">✅ {item.solution}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* API Issues */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">API Server Issues</h2>
+                                        <div className="space-y-4">
+                                            {[
+                                                {
+                                                    issue: "CORS errors in browser",
+                                                    solution: "The API server allows localhost:5173 by default. For production, update CORS settings in api_server.py."
+                                                },
+                                                {
+                                                    issue: "Backend modules not loaded",
+                                                    solution: "Run the server as a module: python -m uvicorn codeshield.api_server:app. Ensure PYTHONPATH includes src/."
+                                                },
+                                                {
+                                                    issue: "Sandbox verification timeout",
+                                                    solution: "Code with infinite loops or heavy computation may timeout. Check for while True loops or reduce computation complexity."
+                                                }
+                                            ].map((item, i) => (
+                                                <div key={i} className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                                                    <strong className="text-blue-400 block mb-2">🔧 {item.issue}</strong>
+                                                    <span className="text-slate-400 text-sm">✅ {item.solution}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Diagnostic */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Quick Diagnostic Commands</h2>
+                                        <CodeBlock 
+                                            title="diagnostic.sh"
+                                            code={`# Check API server health
+curl http://localhost:8000/api/health
+
+# Check LLM provider status
+curl http://localhost:8000/api/providers/status
+
+# Test LLM connectivity (with CometAPI)
+curl "http://localhost:8000/api/providers/test?provider=cometapi"
+
+# Test LLM connectivity (with Novita)
+curl "http://localhost:8000/api/providers/test?provider=novita"
+
+# Check MCP server status
+curl http://localhost:8000/api/mcp/status
+
+# In Claude/Cursor MCP, call:
+# mcp_health() or test_llm_connection()`}
+                                        />
                                     </div>
                                 </div>
                             )}
