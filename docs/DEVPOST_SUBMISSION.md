@@ -74,8 +74,8 @@ Missing `import json`? That's not a 500-token problem. That's a string concatena
 ## How we built it
 
 ### Backend (Python)
-- **FastAPI** for the REST API server
-- **FastMCP** for Model Context Protocol integration
+- **FastAPI** for the REST API server (hosted on Railway)
+- **MCP SDK** for Model Context Protocol integration
 - **AST module** for parsing Python code and detecting imports
 - **SQLite** for metrics, caching, and context persistence
 - **httpx** for async HTTP to LLM providers
@@ -86,19 +86,23 @@ Missing `import json`? That's not a 500-token problem. That's a string concatena
 - **Framer Motion** for animations
 - **Monaco-inspired** code editor component
 
-### Integrations (All 5 Required)
+### Integrations (All 5 Required — Server-Side)
+All API keys are stored on our backend. **Clients need zero configuration.**
+
 - **CometAPI** — Primary LLM access (100+ models, one API)
 - **Novita.ai** — Secondary provider with automatic failover
 - **AIML API** — Tertiary fallback (belt AND suspenders)
 - **Daytona** — Sandbox execution for untrusted code
-- **LeanMCP** — Observability for our MCP server
+- **LeanMCP** — MCP deployment platform with observability
 
 ### MCP Server
-Available as npm package (`npx codeshield-mcp`) with tools for Claude/Cursor:
+Available as npm package (`npx codeshield-mcp`) — connects to our hosted backend:
 - `verify_code` — Quick validation
-- `full_verify` — With sandbox execution
+- `full_verify` — With sandbox execution (Daytona)
 - `check_style` — Convention analysis
 - `save_context` / `restore_context` / `list_contexts`
+
+**No API keys required for clients.** Just install and use.
 
 ### Token Optimization Pipeline
 ```
@@ -204,9 +208,9 @@ Direct integration with Claude/Cursor through MCP feels like magic. The AI can v
 ## Installation
 
 ### MCP Server (for Claude/Cursor)
+**Zero configuration required** — just install and use:
+
 ```bash
-npm install -g codeshield-mcp
-# or
 npx codeshield-mcp
 ```
 
@@ -221,6 +225,8 @@ Claude Desktop config (`claude_desktop_config.json`):
   }
 }
 ```
+
+That's it. No API keys needed. The MCP server connects to our hosted backend which handles all the integrations (Daytona, LLM providers, etc.).
 
 ### Python Library
 ```bash
@@ -240,7 +246,7 @@ print(result.is_valid)
 
 - Python
 - FastAPI
-- FastMCP
+- MCP SDK
 - React
 - TypeScript
 - Vite
@@ -251,6 +257,7 @@ print(result.is_valid)
 - AIML API
 - Daytona
 - LeanMCP
+- Railway (hosting)
 
 ---
 
