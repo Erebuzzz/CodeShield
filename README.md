@@ -2,11 +2,81 @@
 
 > **An intelligent security layer for AI-generated code.** CodeShield validates, formats, and secures code before it enters your production environment, acting as a firewall for your development workflow.
 
+[![PyPI](https://img.shields.io/pypi/v/codeshield-ai?color=blue)](https://pypi.org/project/codeshield-ai/)
+[![npm](https://img.shields.io/npm/v/codeshield-mcp?color=red)](https://www.npmjs.com/package/codeshield-mcp)
 [![Demo](https://img.shields.io/badge/Demo-Live-emerald)](https://codeshield-five.vercel.app/)
-[![Python](https://img.shields.io/badge/Python-3.9+-blue)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 **Built for AI Vibe Coding Hackathon 2026** — *Stop getting betrayed by 90% correct code.*
+
+---
+
+## 📦 Installation
+
+### Python Package (pip)
+
+```bash
+pip install codeshield-ai
+```
+
+### MCP Server (npm/npx)
+
+```bash
+# Install globally
+npm install -g codeshield-mcp
+
+# Or run directly with npx
+npx codeshield-mcp
+```
+
+### Claude Desktop Configuration
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "codeshield": {
+      "command": "npx",
+      "args": ["codeshield-mcp"]
+    }
+  }
+}
+```
+
+---
+
+## 🚀 Quick Start
+
+### Python Usage
+
+```python
+from codeshield import verify_code, check_style, full_verify
+
+# Quick syntax & import verification
+result = verify_code("print(x)", auto_fix=True)
+print(f"Valid: {result.is_valid}")
+print(f"Issues: {result.issues}")
+
+# Style checking against your codebase
+style = check_style("def MyFunc(): pass", "./src")
+print(style.conventions_detected)
+
+# Full sandbox verification (with Daytona if available)
+result = full_verify("x = 1 + 2\nprint(x)")
+print(result['overall_valid'])
+```
+
+### MCP Tools (Claude/Cursor)
+
+Once configured, you can use these tools in Claude:
+
+- **verify_code** - Fast static analysis
+- **full_verify** - Static + sandbox execution  
+- **check_style** - Convention enforcement
+- **save_context** - Save coding state
+- **restore_context** - Restore with AI briefing
 
 ---
 
@@ -231,33 +301,96 @@ CodeShield requires these services for full functionality:
 | **[Novita.ai](https://novita.ai/docs)** | Secondary LLM (cost-effective) | `NOVITA_API_KEY` |
 | **[AIML API](https://aimlapi.com/)** | Fallback LLM | `AIML_API_KEY` |
 | **[Daytona](https://daytona.io/docs)** | Sandbox execution | `DAYTONA_API_KEY`, `DAYTONA_API_URL` |
-| **[LeanMCP](https://docs.leanmcp.com/)** | MCP observability | `LEANMCP_KEY` |
+| **[LeanMCP](https://docs.leanmcp.com/)** | MCP deployment & observability | See [LeanMCP Deployment](#-leanmcp-deployment) |
+
+---
+
+## 🌐 LeanMCP Deployment
+
+CodeShield can be deployed to [LeanMCP Platform](https://ship.leanmcp.com) for production-grade MCP infrastructure with built-in observability.
+
+### Quick Deploy
+
+```bash
+# Install LeanMCP CLI
+npm install -g @leanmcp/cli
+
+# Login to LeanMCP
+leanmcp login
+
+# Deploy CodeShield MCP Server
+cd leanmcp
+npm install
+leanmcp deploy .
+```
+
+Your MCP server will be live at `https://codeshield.leanmcp.link/mcp`
+
+### What You Get
+
+| Feature | Description |
+|---------|-------------|
+| **Edge Deployment** | Auto-scaling across 30+ global regions |
+| **Built-in Monitoring** | Tool analytics, latency metrics, error tracking |
+| **Zero DevOps** | No infrastructure to manage |
+| **MCP Protocol** | Full support for Claude, Cursor, Windsurf, etc. |
+
+### Architecture
+
+```
+MCP Clients → LeanMCP Platform → CodeShield TypeScript MCP → Python Backend
+              (Edge Deployment)   (leanmcp/ folder)          (api_server.py)
+```
+
+### Connect Your MCP Client
+
+**Claude Desktop** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "codeshield": {
+      "url": "https://codeshield.leanmcp.link/mcp"
+    }
+  }
+}
+```
+
+See [leanmcp/README.md](leanmcp/README.md) for full deployment documentation
 
 ---
 
 ## 🚀 Installation
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+ (for frontend)
+### From PyPI (Recommended)
 
-### Setup
+```bash
+pip install codeshield-ai
+```
+
+### From Source
 
 ```bash
 # Clone repository
 git clone https://github.com/Erebuzzz/CodeShield.git
 cd CodeShield
 
-# Install Python dependencies
+# Install in development mode
 pip install -e .
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your API keys
-
-# (Optional) Install frontend dependencies
-cd frontend && npm install
 ```
+
+### MCP Server Setup
+
+```bash
+# Install the MCP server globally
+npm install -g codeshield-mcp
+
+# Or use npx (no install needed)
+npx codeshield-mcp
+```
+
+### Prerequisites
+- Python 3.10+
+- Node.js 18+ (for MCP server)
 
 ### Environment Variables
 
@@ -319,6 +452,23 @@ curl http://localhost:8000/api/tokens/efficiency
 ```
 
 ### MCP Server (Claude/Cursor)
+
+**Option 1: npm package (Recommended)**
+
+Add to your MCP settings (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "codeshield": {
+      "command": "npx",
+      "args": ["codeshield-mcp"]
+    }
+  }
+}
+```
+
+**Option 2: Local Python server**
 
 Add to your MCP settings:
 
@@ -385,7 +535,7 @@ CodeShield/
 │   ├── contextvault/       # State persistence
 │   │   ├── capture.py      # Save context
 │   │   └── restore.py      # Restore with briefing
-│   ├── mcp/                # MCP server
+│   ├── mcp/                # MCP server (Python)
 │   │   └── server.py       # FastMCP implementation
 │   ├── utils/
 │   │   ├── llm.py          # Multi-provider LLM client
@@ -395,6 +545,14 @@ CodeShield/
 │   │   └── leanmcp.py      # Observability client
 │   ├── api_server.py       # FastAPI HTTP server
 │   └── cli.py              # Command-line interface
+├── leanmcp/                # LeanMCP TypeScript MCP Server
+│   ├── main.ts             # Entry point
+│   ├── leanmcp.config.js   # Deployment config
+│   └── mcp/                # MCP services
+│       ├── verification/   # TrustGate tools
+│       ├── styleforge/     # Style tools
+│       ├── contextvault/   # Context tools
+│       └── health/         # Health & metrics
 ├── frontend/               # React/TypeScript UI
 ├── tests/                  # Comprehensive test suite
 └── examples/               # Sample code

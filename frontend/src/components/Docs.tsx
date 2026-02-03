@@ -242,6 +242,30 @@ export const Docs: React.FC<DocsProps> = ({ onBack }) => {
                                         </p>
                                     </div>
 
+                                    {/* Installation */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-6">Quick Installation</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="p-6 rounded-2xl bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <span className="text-2xl">📦</span>
+                                                    <h3 className="text-lg font-medium text-white">npm (MCP Server)</h3>
+                                                    <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Recommended</span>
+                                                </div>
+                                                <code className="block bg-black/30 rounded-lg p-3 text-sm text-slate-300 font-mono mb-3">npm install -g codeshield-mcp</code>
+                                                <p className="text-sm text-slate-400">For Claude Desktop, Cursor, and other MCP clients</p>
+                                            </div>
+                                            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <span className="text-2xl">🐍</span>
+                                                    <h3 className="text-lg font-medium text-white">pip (Python Library)</h3>
+                                                </div>
+                                                <code className="block bg-black/30 rounded-lg p-3 text-sm text-slate-300 font-mono mb-3">pip install codeshield-ai</code>
+                                                <p className="text-sm text-slate-400">For Python projects and API integration</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Features Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         {[
@@ -749,6 +773,26 @@ print(f"Tokens saved: {stats['tokens_saved_by_cache']}")`}
                                         </p>
                                     </div>
 
+                                    {/* Installation */}
+                                    <div>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Quick Install</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                            <div className="p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-transparent border border-red-500/20">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-red-400 font-bold">npm</span>
+                                                    <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Recommended</span>
+                                                </div>
+                                                <code className="text-sm text-slate-300">npm install -g codeshield-mcp</code>
+                                            </div>
+                                            <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-transparent border border-blue-500/20">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-blue-400 font-bold">pip</span>
+                                                </div>
+                                                <code className="text-sm text-slate-300">pip install codeshield-ai</code>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Available Tools */}
                                     <div>
                                         <h2 className="text-2xl font-display font-medium text-white mb-6">Available MCP Tools</h2>
@@ -759,9 +803,7 @@ print(f"Tokens saved: {stats['tokens_saved_by_cache']}")`}
                                                 { name: "check_style", desc: "Check code against codebase conventions" },
                                                 { name: "save_context", desc: "Save current coding context" },
                                                 { name: "restore_context", desc: "Restore a previously saved context" },
-                                                { name: "list_contexts", desc: "List all saved contexts" },
-                                                { name: "mcp_health", desc: "Check MCP server and provider status" },
-                                                { name: "test_llm_connection", desc: "Test LLM provider connectivity" }
+                                                { name: "list_contexts", desc: "List all saved contexts" }
                                             ].map((tool, i) => (
                                                 <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
                                                     <code className="text-emerald-400 text-sm">{tool.name}</code>
@@ -773,10 +815,21 @@ print(f"Tokens saved: {stats['tokens_saved_by_cache']}")`}
 
                                     {/* Configuration */}
                                     <div>
-                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Configuration</h2>
-                                        <p className="text-slate-400 mb-4">Add this to your Claude Desktop or Cursor MCP settings:</p>
+                                        <h2 className="text-2xl font-display font-medium text-white mb-4">Claude Desktop Configuration</h2>
+                                        <p className="text-slate-400 mb-4">Add to your <code className="text-emerald-400">claude_desktop_config.json</code>:</p>
                                         <CodeBlock 
-                                            title="mcp_config.json"
+                                            title="claude_desktop_config.json (npm - Recommended)"
+                                            code={`{
+  "mcpServers": {
+    "codeshield": {
+      "command": "npx",
+      "args": ["codeshield-mcp"]
+    }
+  }
+}`}
+                                        />
+                                        <CodeBlock 
+                                            title="claude_desktop_config.json (Python alternative)"
                                             code={`{
   "mcpServers": {
     "codeshield": {

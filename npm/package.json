@@ -1,0 +1,30 @@
+{
+  "name": "codeshield-mcp",
+  "version": "0.1.0",
+  "description": "CodeShield MCP Server - AI Code Verification for Claude and other MCP clients",
+  "keywords": ["mcp", "model-context-protocol", "ai", "code-verification", "claude"],
+  "author": "Erebuzzz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Erebuzzz/CodeShield.git"
+  },
+  "homepage": "https://github.com/Erebuzzz/CodeShield",
+  "bugs": {
+    "url": "https://github.com/Erebuzzz/CodeShield/issues"
+  },
+  "type": "module",
+  "bin": {
+    "codeshield-mcp": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -20,5 +20,8 @@ RUN pip install --no-cache-dir .
 # Env var for unbuffered output
 ENV PYTHONUNBUFFERED=1
 
-# Default command: Standard MCP (Stdio)
-CMD ["python", "-m", "codeshield.mcp.server"]
+# Default port
+ENV PORT=8000
+
+# Default command: FastAPI HTTP server for cloud deployment
+CMD uvicorn codeshield.api_server:app --host 0.0.0.0 --port $PORT
