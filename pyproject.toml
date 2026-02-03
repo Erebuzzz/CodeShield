@@ -1,14 +1,30 @@
 [project]
-name = "codeshield"
+name = "codeshield-ai"
 version = "0.1.0"
 description = "The Complete AI Coding Safety Net - Verify, Enforce, Remember"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "CodeShield Team" }
+    { name = "CodeShield Team", email = "codeshield@example.com" }
 ]
-keywords = ["mcp", "ai", "code-verification", "developer-tools"]
+maintainers = [
+    { name = "Erebuzzz" }
+]
+keywords = ["mcp", "ai", "code-verification", "developer-tools", "llm", "ai-safety", "code-analysis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
 
 dependencies = [
     "httpx>=0.25.0",
@@ -28,14 +44,27 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "ruff>=0.1.0",
+    "build>=1.0.0",
+    "twine>=4.0.0",
+]
+server = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
 ]
 
 [project.scripts]
 codeshield = "codeshield.cli:main"
+codeshield-server = "codeshield.api_server:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project.urls]
+Homepage = "https://github.com/Erebuzzz/CodeShield"
+Documentation = "https://codeshield-five.vercel.app/"
+Repository = "https://github.com/Erebuzzz/CodeShield.git"
+Issues = "https://github.com/Erebuzzz/CodeShield/issues"
 
 [tool.ruff]
 line-length = 100
