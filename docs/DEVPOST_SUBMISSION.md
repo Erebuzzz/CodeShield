@@ -96,16 +96,34 @@ All API keys are stored on our backend. **Clients need zero configuration.**
 - **LeanMCP** — The backbone of our MCP infrastructure (see below)
 
 ### LeanMCP — Our MCP Deployment Hub
-LeanMCP is central to how CodeShield operates as an MCP server:
+LeanMCP is **central** to how CodeShield operates. It's not just hosting—it's our entire MCP infrastructure layer:
 
-- **Production Deployment** — Our MCP server runs on LeanMCP's infrastructure with automatic scaling
-- **Real-time Observability** — Every tool call is traced: latency, token usage, error rates
-- **Request Analytics** — We see which tools are used most, helping us optimize
-- **Error Tracking** — When something breaks, LeanMCP's dashboard shows exactly where
-- **Version Management** — Deploy new versions without downtime
-- **Usage Metrics** — Track how developers are using CodeShield in the wild
+**Deployment & Scaling**
+- **Production Hosting** — Our MCP server runs on LeanMCP's global infrastructure
+- **Auto-scaling** — Handles traffic spikes without manual intervention
+- **Zero-downtime Deploys** — Push updates without breaking active sessions
+- **Multi-region Support** — Low latency for users worldwide
 
-Without LeanMCP, we'd be flying blind. Their observability layer turned debugging from "why isn't this working?" into "ah, the response took 2.3s because of X."
+**Observability & Debugging**
+- **Real-time Tracing** — Every tool call is traced: latency, token usage, error rates
+- **Request Replay** — Reproduce exact requests that caused issues
+- **Error Stack Traces** — Full context when something breaks
+- **Performance Flamegraphs** — See where time is spent in each request
+
+**Analytics & Optimization**
+- **Tool Usage Heatmaps** — Which tools are used most, when, and by whom
+- **Latency Percentiles** — P50, P95, P99 for each tool
+- **Token Burn Rate** — Track LLM costs per tool, per user
+- **Conversion Funnels** — How users flow between tools
+
+**Developer Experience**
+- **LeanMCP CLI** — `leanmcp dev` for local testing with production-like observability
+- **Webhook Alerts** — Slack/Discord notifications when error rates spike
+- **API Access** — Programmatic access to all metrics for custom dashboards
+- **Team Collaboration** — Shared access to logs and analytics
+
+**Why LeanMCP?**
+Without LeanMCP, we'd be flying blind. Their observability layer turned debugging from "why isn't this working?" into "ah, the response took 2.3s because the Daytona sandbox cold-started." That's the difference between hours of frustration and a 5-minute fix.
 
 ### MCP Server
 Available as npm package (`npx codeshield-mcp`) — connects to our hosted backend:
@@ -123,6 +141,20 @@ Request → LocalProcessor → Cache Check → Prompt Compression → Model Sele
       (fixes imports)    (returns cached)
        zero tokens        zero tokens
 ```
+
+### Local Development with LeanMCP
+```bash
+# Install LeanMCP CLI
+npm install -g @leanmcp/cli
+
+# Run locally with production-like observability
+leanmcp dev --port 3000
+
+# Deploy to production
+leanmcp deploy --project codeshield
+```
+
+The CLI gives us the same tracing and metrics locally that we get in production. No more "works on my machine" mysteries.
 
 ---
 
@@ -176,6 +208,24 @@ MCP is powerful but documentation was sparse when we started. We had to:
 
 Without LeanMCP's visibility into the MCP protocol layer, we'd still be adding print statements everywhere.
 
+### Architecture: How LeanMCP Fits In
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Claude/Cursor  │────▶│    LeanMCP      │────▶│   CodeShield    │
+│   (MCP Client)  │     │  (Proxy Layer)  │     │    (Railway)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                              │
+                              ▼
+                        ┌─────────────────┐
+                        │   Observability │
+                        │   • Tracing     │
+                        │   • Metrics     │
+                        │   • Alerts      │
+                        └─────────────────┘
+```
+
+LeanMCP sits between the MCP client and our backend, capturing everything without adding latency. It's like having X-ray vision into every request.
+
 ---
 
 ## Accomplishments that we're proud of
@@ -217,6 +267,7 @@ LeanMCP taught us that you can't improve what you can't measure. Seeing every to
 
 ## What's next for CodeShield
 
+### Core Features
 - **Language expansion** — JavaScript/TypeScript support (AST parsing with tree-sitter)
 - **IDE extensions** — VS Code extension for inline verification
 - **Team features** — Shared style configurations across projects
@@ -224,8 +275,16 @@ LeanMCP taught us that you can't improve what you can't measure. Seeing every to
 - **Custom import maps** — Let users define their own package patterns
 - **CI/CD integration** — Verify AI-generated PRs automatically
 - **Fine-tuned models** — Train on common fix patterns for even faster local processing
-- **LeanMCP Analytics Dashboard** — Expose usage metrics to teams via LeanMCP's API
-- **A/B Testing via LeanMCP** — Test different verification strategies with traffic splitting
+
+### LeanMCP-Powered Features
+- **Team Analytics Dashboard** — Expose usage metrics to teams via LeanMCP's API
+- **A/B Testing** — Test different verification strategies with LeanMCP's traffic splitting
+- **Rate Limiting** — Use LeanMCP's built-in rate limiting for fair usage
+- **Custom Alerting** — Webhook integrations for Slack/Discord when errors spike
+- **Audit Logs** — Compliance-ready logs of all tool invocations via LeanMCP
+- **Multi-tenant Support** — Isolated environments per team using LeanMCP's project system
+- **Edge Caching** — Cache common responses at LeanMCP's edge nodes for sub-50ms responses
+- **Canary Deployments** — Roll out new versions to 1% of traffic first via LeanMCP
 
 ---
 
