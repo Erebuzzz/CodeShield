@@ -93,7 +93,19 @@ All API keys are stored on our backend. **Clients need zero configuration.**
 - **Novita.ai** — Secondary provider with automatic failover
 - **AIML API** — Tertiary fallback (belt AND suspenders)
 - **Daytona** — Sandbox execution for untrusted code
-- **LeanMCP** — MCP deployment platform with observability
+- **LeanMCP** — The backbone of our MCP infrastructure (see below)
+
+### LeanMCP — Our MCP Deployment Hub
+LeanMCP is central to how CodeShield operates as an MCP server:
+
+- **Production Deployment** — Our MCP server runs on LeanMCP's infrastructure with automatic scaling
+- **Real-time Observability** — Every tool call is traced: latency, token usage, error rates
+- **Request Analytics** — We see which tools are used most, helping us optimize
+- **Error Tracking** — When something breaks, LeanMCP's dashboard shows exactly where
+- **Version Management** — Deploy new versions without downtime
+- **Usage Metrics** — Track how developers are using CodeShield in the wild
+
+Without LeanMCP, we'd be flying blind. Their observability layer turned debugging from "why isn't this working?" into "ah, the response took 2.3s because of X."
 
 ### MCP Server
 Available as npm package (`npx codeshield-mcp`) — connects to our hosted backend:
@@ -156,7 +168,13 @@ MCP is powerful but documentation was sparse when we started. We had to:
 - Debug weird serialization issues
 - Figure out proper error handling
 
-LeanMCP's observability saved us here—we could actually see what was happening.
+**LeanMCP was our secret weapon here.** Their observability dashboard showed us:
+- Exactly what payloads were being sent/received
+- Where serialization was breaking
+- Timing breakdowns for each tool call
+- Error stack traces with full context
+
+Without LeanMCP's visibility into the MCP protocol layer, we'd still be adding print statements everywhere.
 
 ---
 
@@ -171,6 +189,7 @@ LeanMCP's observability saved us here—we could actually see what was happening
 - **Sub-100ms local fixes** — Instant feedback for common issues
 - **Real user research** — We didn't guess the problems, we asked
 - **Working live demo** — codeshield-five.vercel.app (it actually works!)
+- **Full LeanMCP integration** — Production-grade observability and deployment
 
 ---
 
@@ -191,6 +210,9 @@ When the live demo "just works," it's because we obsessed over sensible defaults
 ### MCP is the future of AI tooling
 Direct integration with Claude/Cursor through MCP feels like magic. The AI can verify its own code before giving it to you. Meta, but powerful.
 
+### Observability isn't optional
+LeanMCP taught us that you can't improve what you can't measure. Seeing every tool call, every latency spike, every error in real-time changed how we debug. We went from "it's broken somewhere" to "it's broken at line 47 of the sandbox handler, here's the stack trace."
+
 ---
 
 ## What's next for CodeShield
@@ -202,6 +224,8 @@ Direct integration with Claude/Cursor through MCP feels like magic. The AI can v
 - **Custom import maps** — Let users define their own package patterns
 - **CI/CD integration** — Verify AI-generated PRs automatically
 - **Fine-tuned models** — Train on common fix patterns for even faster local processing
+- **LeanMCP Analytics Dashboard** — Expose usage metrics to teams via LeanMCP's API
+- **A/B Testing via LeanMCP** — Test different verification strategies with traffic splitting
 
 ---
 
