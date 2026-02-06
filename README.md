@@ -12,7 +12,7 @@
 
 ---
 
-## 📦 Installation
+##  Installation
 
 ### Python Package (pip)
 
