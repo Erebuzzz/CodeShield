@@ -1,0 +1,58 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#5eead4"/>
+    </linearGradient>
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#22c55e"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Grid pattern overlay -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.03"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  
+  <!-- Glow effect behind shield -->
+  <ellipse cx="600" cy="260" rx="180" ry="180" fill="#34d399" opacity="0.1" filter="blur(60px)"/>
+  
+  <!-- Shield icon -->
+  <g transform="translate(520, 140)">
+    <path d="M80 0L0 40V80C0 124.4 30.72 162.96 80 176C129.28 162.96 160 124.4 160 80V40L80 0Z" 
+          fill="url(#shieldGradient)" opacity="0.9"/>
+    <path d="M80 10L10 45V80C10 119.6 37.6 154.4 80 166C122.4 154.4 150 119.6 150 80V45L80 10Z" 
+          fill="#0a0a0a"/>
+    <path d="M80 20L20 50V80C20 114.8 44.48 145.84 80 156C115.52 145.84 140 114.8 140 80V50L80 20Z" 
+          fill="url(#shieldGradient)" opacity="0.15"/>
+    <!-- Checkmark -->
+    <path d="M55 90L75 110L115 70" stroke="#34d399" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="600" y="400" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" fill="white">
+    CodeShield
+  </text>
+  
+  <!-- Tagline with gradient -->
+  <text x="600" y="470" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="400" fill="url(#greenGradient)">
+    AI Code That Actually Works
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="520" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#9ca3af">
+    Verify logic • Enforce style • Preserve context
+  </text>
+  
+  <!-- Bottom accent line -->
+  <rect x="450" y="570" width="300" height="3" rx="1.5" fill="url(#greenGradient)" opacity="0.6"/>
+</svg>
