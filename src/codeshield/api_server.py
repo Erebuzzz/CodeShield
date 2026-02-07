@@ -33,9 +33,19 @@ except ImportError:
 app = FastAPI(title="CodeShield API", version="0.1.0")
 
 # Configure CORS
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://codeshield-five.vercel.app",
+]
+# Allow additional origins via environment variable (comma-separated)
+extra_origins = os.environ.get("CORS_ORIGINS", "")
+if extra_origins:
+    allowed_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Vite dev server
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
