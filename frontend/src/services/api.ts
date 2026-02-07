@@ -2,7 +2,7 @@
  * API Service - Communication with CodeShield Python backend
  */
 
-const API_BASE_URL = 'https://super-jordan-34.leanmcp.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://codeshield-production.up.railway.app';
 
 export interface Issue {
     type: 'error' | 'warning' | 'info';
