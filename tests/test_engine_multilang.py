@@ -407,6 +407,7 @@ z = x + y
         pr = parse_source(code, "python")
         meta = normalise(pr)
         cfg = build_cfg(meta)
+        assert cfg.entry is not None
         reachable = cfg.reachable_from(cfg.entry)
         assert cfg.exit in reachable
 

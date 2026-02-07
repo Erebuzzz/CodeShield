@@ -40,10 +40,7 @@ def _get_language(lang: Lang) -> Language:
             raise ValueError(f"Unsupported language: {lang}")
 
         # Handle both old (Language(ptr, name)) and new (Language(ptr)) APIs
-        try:
-            _LANGUAGES[lang] = Language(ptr)
-        except TypeError:
-            _LANGUAGES[lang] = Language(ptr, lang.value)
+        _LANGUAGES[lang] = Language(ptr)
     return _LANGUAGES[lang]
 
 

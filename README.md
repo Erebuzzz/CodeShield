@@ -16,22 +16,24 @@
 ## Table of Contents
 
 - [Installation](#installation)
-- [Quick Start](#-quick-start)
-- [What CodeShield Does](#-what-codeshield-does)
-- [Architecture](#-architecture)
-- [TrustGate v2 Engine](#-trustgate-v2--multi-language-verification-engine)
-- [StyleForge](#-styleforge--convention-enforcement)
-- [ContextVault](#-contextvault--state-persistence)
-- [Plugin System](#-plugin-system)
-- [SDK](#-sdk--programmatic-api)
-- [Token Efficiency](#-token-efficiency--up-to-95-savings)
-- [MCP Server](#-mcp-server-18-tools)
-- [CLI](#-cli-commands)
-- [REST API](#-rest-api-endpoints)
-- [Provider Stack](#-provider-stack)
-- [Dashboard](#-dashboard)
-- [Testing](#-testing)
-- [Project Structure](#-project-structure)
+- [Quick Start](#quick-start)
+- [What CodeShield Does](#what-codeshield-does)
+- [Architecture](#architecture)
+- [TrustGate v2 Engine](#trustgate-v2--multi-language-verification-engine)
+- [StyleForge](#styleforge--convention-enforcement)
+- [ContextVault](#contextvault--state-persistence)
+- [Plugin System](#plugin-system)
+- [SDK](#sdk--programmatic-api)
+- [Live Metrics](#live-metrics--always-on-telemetry)
+- [Token Efficiency](#token-efficiency--up-to-95-savings)
+- [MCP Server](#mcp-server-18-tools)
+- [CLI](#cli-commands)
+- [REST API](#rest-api-endpoints)
+- [Provider Stack](#provider-stack)
+- [Dashboard](#dashboard)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Changelog](#changelog)
 
 ---
 
@@ -80,7 +82,7 @@ LEANMCP_KEY=leanmcp_your-key               # MCP observability
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Python SDK (Recommended)
 
@@ -153,7 +155,7 @@ dashboard_sync · language_plugin_install
 
 ---
 
-## 🎯 What CodeShield Does
+## What CodeShield Does
 
 CodeShield intercepts AI-generated code and ensures it's:
 
@@ -166,7 +168,7 @@ CodeShield intercepts AI-generated code and ensures it's:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -218,7 +220,7 @@ Every code verification flows through the same 6-layer pipeline — no duplicate
 
 ---
 
-## 🛡️ TrustGate v2 — Multi-Language Verification Engine
+## TrustGate v2 — Multi-Language Verification Engine
 
 The v2 engine replaces Python `ast` with a tree-sitter-powered pipeline that works across languages.
 
@@ -226,23 +228,23 @@ The v2 engine replaces Python `ast` with a tree-sitter-powered pipeline that wor
 
 | Language | Parser | Status |
 |----------|--------|--------|
-| Python | tree-sitter-python | ✅ Full support |
-| JavaScript | tree-sitter-javascript | ✅ Full support |
-| TypeScript | Plugin-ready | 🔜 Planned |
-| Rust | Plugin-ready | 🔜 Planned |
-| Go | Plugin-ready | 🔜 Planned |
+| Python | tree-sitter-python | Full support |
+| JavaScript | tree-sitter-javascript | Full support |
+| TypeScript | Plugin-ready | Planned |
+| Rust | Plugin-ready | Planned |
+| Go | Plugin-ready | Planned |
 
 ### Detection Rules (Built-in)
 
 | Rule ID | Severity | Languages | What It Catches |
 |---------|----------|-----------|-----------------|
-| `shell_injection` | 🔴 Critical | Python, JS | `eval()`, `exec()`, `os.system()`, `subprocess` with user input |
-| `taint_flow` | 🔴 Critical | Python, JS | Data flowing from `input()`/`stdin` to dangerous sinks |
-| `hardcoded_secret` | 🔴 Error | Python, JS | Passwords, API keys, tokens in source code |
-| `type_mismatch` | 🟡 Warning | Python | `str + int`, incompatible binary operations |
-| `unused_import` | 🟡 Warning | Python | Imported modules never referenced |
-| `bare_except` | 🟡 Warning | Python | `except:` without specific exception type |
-| `unreachable_code` | ℹ️ Info | Python, JS | Code after `return`/`break` in CFG |
+| `shell_injection` | Critical | Python, JS | `eval()`, `exec()`, `os.system()`, `subprocess` with user input |
+| `taint_flow` | Critical | Python, JS | Data flowing from `input()`/`stdin` to dangerous sinks |
+| `hardcoded_secret` | Error | Python, JS | Passwords, API keys, tokens in source code |
+| `type_mismatch` | Warning | Python | `str + int`, incompatible binary operations |
+| `unused_import` | Warning | Python | Imported modules never referenced |
+| `bare_except` | Warning | Python | `except:` without specific exception type |
+| `unreachable_code` | Info | Python, JS | Code after `return`/`break` in CFG |
 
 ### Program Graphs
 
@@ -286,7 +288,7 @@ cfg = build_cfg(meta)
 
 ---
 
-## 🎨 StyleForge — Convention Enforcement
+## StyleForge — Convention Enforcement
 
 Analyzes your codebase to detect and enforce naming conventions:
 
@@ -315,7 +317,7 @@ print(result.corrected_code)        # Uses snake_case throughout
 
 ---
 
-## 💾 ContextVault — State Persistence
+## ContextVault — State Persistence
 
 Saves your development state like a game save file, with crash-safe auto-save:
 
@@ -356,7 +358,7 @@ print(result["briefing"])  # "You were working on auth token logic..."
 
 ---
 
-## 🔌 Plugin System
+## Plugin System
 
 Extensible architecture supporting 5 plugin types:
 
@@ -401,7 +403,7 @@ from codeshield.plugins import HookEvent
 
 ---
 
-## 📦 SDK — Programmatic API
+## SDK — Programmatic API
 
 The `codeshield.sdk` module provides a clean, high-level Python API:
 
@@ -420,7 +422,7 @@ from codeshield.sdk import (
 report = audit_deps("requirements.txt")
 print(f"{report['flagged']} packages with known CVEs out of {report['total']}")
 for advisory in report["advisories"]:
-    print(f"  ⚠ {advisory['package']}: {advisory['advisory']}")
+    print(f"   {advisory['package']}: {advisory['advisory']}")
 
 # List all rules (built-in + plugins)
 for rule in list_rules():
@@ -429,7 +431,7 @@ for rule in list_rules():
 
 ---
 
-## 📊 Live Metrics — Always-On Telemetry
+## Live Metrics — Always-On Telemetry
 
 Metrics are **always on by default** — every verification, token call, and style check is tracked in real-time with zero performance overhead. No setup needed.
 
@@ -517,7 +519,7 @@ curl -X POST http://localhost:8000/api/live-metrics/toggle \
 
 ---
 
-## ⚡ Token Efficiency — Up to 95% Savings
+## Token Efficiency — Up to 95% Savings
 
 Local-first architecture minimizes LLM calls:
 
@@ -549,7 +551,7 @@ print(f"Tokens saved: {stats['tokens_saved_by_cache']}")
 
 ---
 
-## 🔧 MCP Server (18 Tools)
+## MCP Server (18 Tools)
 
 ### Configuration
 
@@ -616,7 +618,7 @@ print(f"Tokens saved: {stats['tokens_saved_by_cache']}")
 
 ---
 
-## ⌨️ CLI Commands
+## CLI Commands
 
 ```
 codeshield <command> [options]
@@ -640,7 +642,7 @@ codeshield <command> [options]
 
 ---
 
-## 🌐 REST API Endpoints
+## REST API Endpoints
 
 ### Core
 
@@ -705,7 +707,7 @@ codeshield <command> [options]
 
 ---
 
-## 💰 Provider Stack
+## Provider Stack
 
 CodeShield uses **cheapest-first routing** to stay within credit limits:
 
@@ -734,7 +736,7 @@ CodeShield uses **cheapest-first routing** to stay within credit limits:
 
 ---
 
-## 📊 Dashboard
+## Dashboard
 
 CodeShield includes backend endpoints for a full-featured dashboard:
 
@@ -758,7 +760,7 @@ CodeShield includes backend endpoints for a full-featured dashboard:
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run v2 engine tests (54 tests across 10 suites)
@@ -796,7 +798,7 @@ python demo_token_efficiency.py
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 CodeShield/
@@ -847,7 +849,7 @@ CodeShield/
 
 ---
 
-## 🌐 LeanMCP Deployment
+## LeanMCP Deployment
 
 CodeShield can be deployed to [LeanMCP Platform](https://ship.leanmcp.com) for production-grade MCP infrastructure:
 
@@ -867,7 +869,7 @@ Your MCP server will be live at `https://codeshield.leanmcp.link/mcp`
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 Based on the [CodeShield Master Plan](docs/DEVPOST_SUBMISSION.md):
 
@@ -893,7 +895,7 @@ Based on the [CodeShield Master Plan](docs/DEVPOST_SUBMISSION.md):
 
 ---
 
-## 🤝 Built With
+## Built With
 
 | Sponsor | Integration |
 |---------|-------------|
@@ -904,17 +906,29 @@ Based on the [CodeShield Master Plan](docs/DEVPOST_SUBMISSION.md):
 
 ---
 
-## 📜 License
+## License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🙋 Support
+## Support
 
-- 📖 [Documentation](https://codeshield-five.vercel.app/)
-- 🐛 [Issue Tracker](https://github.com/Erebuzzz/CodeShield/issues)
-- 💬 [Discussions](https://github.com/Erebuzzz/CodeShield/discussions)
+- [Documentation](https://codeshield-five.vercel.app/)
+- [Issue Tracker](https://github.com/Erebuzzz/CodeShield/issues)
+- [Discussions](https://github.com/Erebuzzz/CodeShield/discussions)
+
+---
+
+## Changelog
+
+| Date | Version | Changes |
+|------|---------|--------|
+| 2026-02-07 | 0.5.0 | Always-on live metrics (zero-overhead telemetry, `_metrics` in every API response, CLI banner, toggle support); 3 new endpoints (`/api/live-metrics`, `/api/live-metrics/toggle`, `/api/live-metrics/reset`); `--quiet` and `--no-metrics` CLI flags |
+| 2026-02-06 | 0.4.0 | Full README rewrite; SDK module (7 public functions); JS `hardcoded_secret` detection fix; 54 engine tests passing |
+| 2026-02-05 | 0.3.0 | Platform expansion: plugin architecture (5 types), MCP server (18 tools), CLI (11 commands), auto-save crash recovery, dashboard backend, 27+ REST endpoints |
+| 2026-02-04 | 0.2.0 | TrustGate v2 engine: tree-sitter parser, MetaAST normalizer, program graphs (CFG/DFG/TFG/call graph), 7 built-in rules, executor with SHA-256 caching; Python + JavaScript support |
+| 2026-02-03 | 0.1.0 | Initial release: TrustGate v1 (AST-based), StyleForge, ContextVault, token optimizer, MCP server (6 tools), FastAPI backend, React frontend |
 
 ---
 

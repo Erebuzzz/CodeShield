@@ -82,9 +82,9 @@ def perform_autosave(reason: str = "periodic") -> dict | None:
         result = save_context(
             name=name,
             files=_last_context.get("files", []),
-            cursor=_last_context.get("cursor"),
+            cursor=_last_context.get("cursor", {}),
             notes=f"[auto-save: {reason}] {_last_context.get('notes', '')}".strip(),
-            last_edited_file=_last_context.get("last_edited_file"),
+            last_edited_file=_last_context.get("last_edited_file", ""),
         )
         _prune_old_autosaves()
         return result

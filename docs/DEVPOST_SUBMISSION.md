@@ -38,25 +38,25 @@ CodeShield is a **token-efficient verification layer** that sits between AI and 
 
 **Three core modules:**
 
-### 🛡️ TrustGate — Security Verification
+### TrustGate — Security Verification
 - Detects missing imports using AST parsing
 - Fixes 35+ common packages **locally** (zero tokens!)
 - Confidence scoring to tell you how "sus" the code is
 - Optional sandbox execution via Daytona for untrusted code
 
-### 🎨 StyleForge — Convention Enforcement  
+### StyleForge — Convention Enforcement  
 - Scans YOUR codebase to learn YOUR conventions
 - Detects snake_case, camelCase, PascalCase patterns
 - Converts AI's style chaos to match your project
 - Typo detection using Levenshtein distance (catches `usre` → `user`)
 
-### 💾 ContextVault — State Persistence
+### ContextVault — State Persistence
 - Save your coding session like a video game checkpoint
 - Stores files, cursor position, open tabs, notes
 - AI-generated briefings when you restore
 - Never lose context after lunch again
 
-### ⚡ Token Efficiency — 90% Savings
+### Token Efficiency — 90% Savings
 We obsessed over not wasting money:
 
 | Optimization | Savings |
@@ -350,6 +350,18 @@ print(result.is_valid)
 - **GitHub:** [github.com/Erebuzzz/CodeShield](https://github.com/Erebuzzz/CodeShield)
 - **PyPI:** [pypi.org/project/codeshield-ai](https://pypi.org/project/codeshield-ai/)
 - **npm:** [npmjs.com/package/codeshield-mcp](https://www.npmjs.com/package/codeshield-mcp)
+
+---
+
+## Changelog
+
+| Date | Version | Changes |
+|------|---------|--------|
+| 2026-02-07 | 0.5.0 | Always-on live metrics (zero-overhead telemetry, auto-injected in every API response and CLI output, toggleable); 3 new REST endpoints; `--quiet` and `--no-metrics` CLI flags |
+| 2026-02-06 | 0.4.0 | Full README rewrite; SDK module (7 public functions); JS hardcoded_secret detection fix; 54 engine tests passing |
+| 2026-02-05 | 0.3.0 | Platform expansion: plugin architecture (5 types), MCP server (18 tools), CLI (11 commands), auto-save crash recovery, dashboard backend, 27+ REST endpoints |
+| 2026-02-04 | 0.2.0 | TrustGate v2 engine: tree-sitter multi-language parser, MetaAST, program graphs (CFG/DFG/TFG/call graph), 7 built-in rules, executor with SHA-256 caching |
+| 2026-02-03 | 0.1.0 | Initial release: TrustGate v1 (AST-based), StyleForge, ContextVault, token optimizer, MCP server (6 tools), FastAPI backend, React frontend |
 
 ---
 

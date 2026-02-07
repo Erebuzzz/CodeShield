@@ -95,12 +95,15 @@ class LiveMetrics:
     """
 
     _instance: LiveMetrics | None = None
+    _c: _Counters
+    _flush_timer: threading.Timer | None
+    _started: bool
 
     def __new__(cls) -> LiveMetrics:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._c = _Counters()
-            cls._instance._flush_timer: threading.Timer | None = None
+            cls._instance._flush_timer = None
             cls._instance._started = False
         return cls._instance
 
