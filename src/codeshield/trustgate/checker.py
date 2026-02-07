@@ -251,6 +251,59 @@ def detect_undefined_names(code: str) -> list[VerificationIssue]:
     return issues
 
 
+def detect_type_issues(code: str) -> list[VerificationIssue]:
+    """Detect basic type mismatch issues via AST analysis"""
+    issues = []
+
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return issues
+
+    for node in ast.walk(tree):
+        # Detect BinOp mixing str literals with arithmetic (+, -, *, /)
+        if isinstance(node, ast.BinOp):
+            left_is_str = isinstance(node.left, ast.Constant) and isinstance(node.left.value, str)
+            right_is_str = isinstance(node.right, ast.Constant) and isinstance(node.right.value, str)
+            left_is_num = isinstance(node.left, ast.Constant) and isinstance(node.left.value, (int, float))
+            right_is_num = isinstance(node.right, ast.Constant) and isinstance(node.right.value, (int, float))
+
+            # str + number or number + str  (with Add)
+            if isinstance(node.op, ast.Add) and ((left_is_str and right_is_num) or (left_is_num and right_is_str)):
+                issues.append(VerificationIssue(
+                    severity="error",
+                    message="Type error: cannot concatenate str and int/float with '+'",
+                    line=node.lineno,
+                    fix_available=True,
+                    fix_description="Convert the numeric operand with str() or remove the string",
+                ))
+
+            # Arithmetic on BinOp result + str  (e.g. a*b + "text")
+            if isinstance(node.op, ast.Add):
+                left_is_binop = isinstance(node.left, ast.BinOp)
+                right_is_binop = isinstance(node.right, ast.BinOp)
+                if (left_is_binop and right_is_str) or (right_is_binop and left_is_str):
+                    issues.append(VerificationIssue(
+                        severity="error",
+                        message="Potential type error: adding arithmetic result to a string literal",
+                        line=node.lineno,
+                        fix_available=True,
+                        fix_description="Wrap the arithmetic expression with str() or use an f-string",
+                    ))
+
+            # Multiply / subtract / divide with a string operand
+            if isinstance(node.op, (ast.Sub, ast.Div, ast.FloorDiv, ast.Mod)):
+                if left_is_str or right_is_str:
+                    issues.append(VerificationIssue(
+                        severity="error",
+                        message=f"Type error: unsupported operand type for '{type(node.op).__name__}' with str",
+                        line=node.lineno,
+                        fix_available=False,
+                    ))
+
+    return issues
+
+
 def auto_fix_imports(code: str, issues: list[VerificationIssue]) -> str:
     """Auto-fix missing imports"""
     imports_to_add = []
@@ -323,6 +376,10 @@ def verify_code(code: str, auto_fix: bool = True) -> VerificationResult:
     # 3. Undefined names
     undefined_issues = detect_undefined_names(code)
     issues.extend(undefined_issues)
+
+    # 4. Type mismatch detection
+    type_issues = detect_type_issues(code)
+    issues.extend(type_issues)
     
     # Calculate confidence score
     error_count = sum(1 for i in issues if i.severity == "error")

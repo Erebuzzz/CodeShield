@@ -44,7 +44,20 @@ export async function verifyCode(code: string, autoFix: boolean = true): Promise
             throw new Error(`API error: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        // Map snake_case API response to camelCase frontend interface
+        return {
+            isValid: data.is_valid ?? data.isValid ?? true,
+            confidence: Math.round((data.confidence_score ?? data.confidence ?? 1) * 100),
+            issues: (data.issues ?? []).map((i: any) => ({
+                type: i.type ?? i.severity ?? 'info',
+                message: i.message,
+                line: i.line,
+                fix: i.fix ?? i.fix_description,
+            })),
+            fixedCode: data.fixed_code ?? data.fixedCode,
+            executionResult: data.execution_result ?? data.executionResult,
+        };
     } catch (error) {
         console.error('API Error:', error);
         // Return mock data for demo when API unavailable
@@ -90,7 +103,19 @@ export async function fullVerify(code: string): Promise<VerificationResult> {
             throw new Error(`API error: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        return {
+            isValid: data.is_valid ?? data.isValid ?? true,
+            confidence: Math.round((data.confidence_score ?? data.confidence ?? 1) * 100),
+            issues: (data.issues ?? []).map((i: any) => ({
+                type: i.type ?? i.severity ?? 'info',
+                message: i.message,
+                line: i.line,
+                fix: i.fix ?? i.fix_description,
+            })),
+            fixedCode: data.fixed_code ?? data.fixedCode,
+            executionResult: data.execution_result ?? data.executionResult,
+        };
     } catch (error) {
         console.error('API Error:', error);
         return mockVerify(code);
