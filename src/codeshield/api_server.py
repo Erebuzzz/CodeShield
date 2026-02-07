@@ -3,14 +3,14 @@ CodeShield API Server
 Exposes CodeShield functionality via HTTP for the React Frontend.
 """
 
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 from typing import List, Optional, Any
 import uvicorn
 import os
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 
 # Import CodeShield core modules
 # We wrap imports in try/except to handle potential missing dependencies during dev
@@ -20,7 +20,7 @@ try:
     from codeshield.styleforge.corrector import check_style
     from codeshield.contextvault.capture import save_context, list_contexts
     from codeshield.contextvault.restore import restore_context
-except ImportError:
+except Exception:
     # Fallback for dev environment if paths aren't set up
     print("WARNING: Could not import CodeShield modules. Ensure you are running as a module.")
     verify_code = None
@@ -32,23 +32,14 @@ except ImportError:
 
 app = FastAPI(title="CodeShield API", version="0.1.0")
 
-# Configure CORS
-allowed_origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://codeshield-five.vercel.app",
-]
-# Allow additional origins via environment variable (comma-separated)
-extra_origins = os.environ.get("CORS_ORIGINS", "")
-if extra_origins:
-    allowed_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
-
+# Configure CORS — allow all origins for public API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # --- Data Models ---
@@ -73,6 +64,7 @@ class ContextRestoreRequest(BaseModel):
 
 # --- Endpoints ---
 
+@app.get("/health")
 @app.get("/api/health")
 async def health_check():
     return {"status": "online", "service": "CodeShield API"}
