@@ -365,4 +365,150 @@ print(result.is_valid)
 
 ---
 
+## Future Roadmap: Advanced Research Features
+
+### Project-Scoped Global Memory System
+
+A next-generation memory architecture designed to revolutionize how CodeShield maintains context across coding sessions and projects.
+
+#### Core Concept
+Maintain **isolated, project-specific working memory environments** that enhance token efficiency, reduce hallucinations, and enable intelligent multi-tier agent routing using structured task-context trees.
+
+**Key Benefits:**
+- Fine-grained context reuse across tasks
+- Accurate task difficulty estimation
+- Efficient agent selection and routing
+- Clean isolation between projects
+- Stable and predictable agent behavior
+
+#### Architecture Overview
+
+**Memory Environments:**
+- Each project gets its own isolated environment (ProjectA → Env1, ProjectB → Env2)
+- No shared embeddings, dependency graphs, or naming conventions across environments
+- Environment switching triggers hard context reload
+- Independent serialization per environment
+
+**Hierarchical Context Tree:**
+
+Each environment maintains a tree structure where nodes represent tasks and subtasks:
+
+```
+TaskNode {
+  task_id: unique identifier
+  task_description: "what the user wanted"
+  task_type: classification (style fix, debug, build, refactor, etc.)
+  complexity_score: numerical estimate guiding agent tier
+  context_snapshot: {
+    files_involved: []
+    cursor_positions: {}
+    relevant_code_blocks: []
+    previous_errors: []
+  }
+  semantic_data: {
+    embeddings: []
+    dependency_links: []
+    call_relations: []
+  }
+  children: [subtask nodes]
+  parent: reference to parent node
+}
+```
+
+**Inheritance Behavior:**
+- Children inherit semantic data and style profiles from parents
+- Context deltas merge upward through the tree
+- Efficient navigation of related context
+- Structured knowledge inheritance across subtasks
+
+#### Intelligent Task Complexity Estimation
+
+Complexity scores are calculated based on:
+- Number of files involved
+- Semantic links count
+- Function graph depth
+- Context snapshot size
+- Error count and recent failures
+- Child branch depth
+- Presence of cross-file logic
+
+**Score thresholds guide agent routing:**
+
+| Tier | Agent Type | Complexity Score | Use Case |
+|------|-----------|------------------|----------|
+| 0 | Local Static Tools | < 2 | Single file, no cross-references |
+| 1 | Low Tier LLM (free) | 2-5 | 1-2 child branches, basic semantic context |
+| 2 | Mid Tier LLM | 5-8 | Multi-file changes, branch depth ≥ 2 |
+| 3 | High Tier LLM | ≥ 8 | High-risk logic, deep reasoning, tier 1/2 failed |
+
+#### Semantic State Per Environment
+
+```
+environment_state {
+  embeddings_index: vector store specific to this project
+  style_profile: consistent naming pattern
+  dependency_graph: module and import relationships
+  function_graph: static and inferred call graph
+  task_history: list of task branches with timestamps
+}
+
+environment_metadata {
+  project_root: absolute path
+  file_hash_map: track file changes
+  last_updated: timestamp
+  branching_depth_limit: 10 (configurable)
+}
+```
+
+#### Workflow Integration
+
+1. **Detect project** → Identify current workspace
+2. **Load environment** → Load EnvX with context_tree and semantic_state
+3. **Select node** → Locate or create task node in context tree
+4. **Estimate complexity** → Calculate complexity_score from context
+5. **Route to agent** → Select appropriate tier based on score
+6. **Execute task** → Agent completes work using environment context
+7. **Update tree** → Add/update node with new semantic and snapshot data
+8. **Save environment** → Write updated environment to disk
+
+#### Token Efficiency Impact
+
+**Expected savings: 60-90% depending on workflow**
+
+How it works:
+- Load only relevant context slices from the tree
+- Skip unrelated branches to reduce prompt size
+- Reuse semantic data across sibling tasks
+- Cheaper agents operate with high-tier awareness
+- Entire agent chain becomes shorter and more predictable
+
+#### Privacy and Safety
+
+**Strict isolation guarantees:**
+- Each environment completely isolated
+- No shared task trees between projects
+- No shared embeddings or error histories
+- No shared semantic links
+- Result: Project-level privacy with **zero cross-contamination**
+
+#### Implementation Considerations
+
+This system would integrate with:
+- **ContextVault** for persistence layer
+- **TrustGate v2** for semantic analysis and graph generation
+- **Token Optimizer** for measuring actual savings
+- **MCP Server** for exposing environment operations as tools
+- **LeanMCP** for tracking agent routing decisions and performance
+
+**Research Questions:**
+- Optimal branching depth limits
+- Cache invalidation strategies for file changes
+- Complexity scoring algorithm calibration
+- Memory requirements for large projects (10k+ files)
+- Real-time vs batch environment updates
+
+This feature represents a potential **research contribution** to the field of AI-assisted development, combining program analysis, hierarchical memory systems, and intelligent agent routing.
+
+---
+
 *CodeShield: Verify, don't trust.*
